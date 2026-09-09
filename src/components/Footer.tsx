@@ -77,11 +77,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/architecture" className="hover:text-white transition-colors">
-                  R2 Storage Architecture
-                </Link>
-              </li>
-              <li>
                 <Link href="/account/downloads" className="hover:text-white transition-colors">
                   Buyer Asset Vault
                 </Link>

@@ -13,7 +13,6 @@ import {
   LayoutDashboard,
   Layers,
   ChevronDown,
-  Cloud,
   LogOut,
   Sparkles,
   ExternalLink,
@@ -66,13 +65,6 @@ export default function Navbar() {
               }`}
             >
               Creator Studios
-            </Link>
-            <Link
-              href="/architecture"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:bg-zinc-900 hover:text-amber-300 transition-colors"
-            >
-              <Cloud className="h-3.5 w-3.5 text-amber-400" />
-              <span>Cloudflare R2</span>
             </Link>
           </nav>
         </div>
