@@ -166,6 +166,20 @@ export const prisma = new Proxy({} as PrismaClient, {
               }
             }
 
+            if (prop === "orderItem") {
+              if (method === "create") {
+                return {
+                  id: `oi_demo_${Math.random().toString(36).substring(2, 10)}`,
+                  orderId: args[0]?.data?.orderId || "ord_demo_edge",
+                  photoId: args[0]?.data?.photoId || "p1",
+                  priceCents: args[0]?.data?.priceCents || 799900,
+                  licenseName: args[0]?.data?.licenseName || "Commercial Advertising",
+                  createdAt: new Date(),
+                };
+              }
+              if (method === "findMany") return [];
+            }
+
             if (prop === "downloadGrant") {
               if (method === "findMany") {
                 return [
