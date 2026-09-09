@@ -6,10 +6,11 @@ export const runtime = "edge";
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ grantId: string }> }
+  context: { params: { grantId: string } | Promise<{ grantId: string }> }
 ) {
   try {
-    const { grantId } = await context.params;
+    const resolvedParams = await Promise.resolve(context.params);
+    const { grantId } = resolvedParams;
 
     const grant = await prisma.downloadGrant.findFirst({
       where: {

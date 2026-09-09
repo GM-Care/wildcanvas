@@ -1,12 +1,3 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-  HeadObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
 const R2_ACCOUNT_ID = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
 const R2_ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
 const R2_SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
@@ -17,17 +8,21 @@ export const isR2Configured = Boolean(
   R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY
 );
 
-// Cloudflare R2 S3-compatible client
-export const r2Client = isR2Configured
-  ? new S3Client({
-      region: "auto",
-      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: R2_ACCESS_KEY_ID!,
-        secretAccessKey: R2_SECRET_ACCESS_KEY!,
-      },
-    })
-  : null;
+let _cachedClient: any = null;
+async function getR2Client() {
+  if (!isR2Configured) return null;
+  if (_cachedClient) return _cachedClient;
+  const { S3Client } = await import("@aws-sdk/client-s3");
+  _cachedClient = new S3Client({
+    region: "auto",
+    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: R2_ACCESS_KEY_ID!,
+      secretAccessKey: R2_SECRET_ACCESS_KEY!,
+    },
+  });
+  return _cachedClient;
+}
 
 /**
  * Generate a Presigned Upload URL for direct-to-R2 client uploads.
@@ -39,7 +34,8 @@ export async function generateR2UploadPresignedUrl(
   contentType: string,
   expiresInSeconds: number = 900 // 15 mins
 ): Promise<{ uploadUrl: string; key: string; isR2: boolean }> {
-  if (!isR2Configured || !r2Client) {
+  const client = await getR2Client();
+  if (!client) {
     // Local / Dev Fallback: Direct endpoint
     return {
       uploadUrl: `/api/upload/local?key=${encodeURIComponent(key)}`,
@@ -48,13 +44,16 @@ export async function generateR2UploadPresignedUrl(
     };
   }
 
+  const { PutObjectCommand } = await import("@aws-sdk/client-s3");
+  const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,
     Key: key,
     ContentType: contentType,
   });
 
-  const uploadUrl = await getSignedUrl(r2Client, command, {
+  const uploadUrl = await getSignedUrl(client, command, {
     expiresIn: expiresInSeconds,
   });
 
@@ -70,10 +69,14 @@ export async function generateR2DownloadPresignedUrl(
   filename?: string,
   expiresInSeconds: number = 3600 // 1 hour
 ): Promise<string> {
-  if (!isR2Configured || !r2Client) {
+  const client = await getR2Client();
+  if (!client) {
     // Local emulation fallback
     return `/api/download/file?key=${encodeURIComponent(key)}&fn=${encodeURIComponent(filename || "photo.jpg")}`;
   }
+
+  const { GetObjectCommand } = await import("@aws-sdk/client-s3");
+  const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
 
   const command = new GetObjectCommand({
     Bucket: R2_BUCKET_NAME,
@@ -83,7 +86,7 @@ export async function generateR2DownloadPresignedUrl(
       : "attachment",
   });
 
-  return await getSignedUrl(r2Client, command, {
+  return await getSignedUrl(client, command, {
     expiresIn: expiresInSeconds,
   });
 }

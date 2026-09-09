@@ -6,14 +6,15 @@ import { PhotoDto } from "@/types";
 import { Camera, ShieldCheck, Mail, MapPin, Sparkles, ExternalLink } from "lucide-react";
 
 interface TenantStorefrontPageProps {
-  params: Promise<{ tenantSlug: string }>;
+  params: { tenantSlug: string } | Promise<{ tenantSlug: string }>;
 }
 
 export const revalidate = 30;
 export const runtime = "edge";
 
 export default async function TenantStorefrontPage({ params }: TenantStorefrontPageProps) {
-  const { tenantSlug } = await params;
+  const resolvedParams = await Promise.resolve(params);
+  const { tenantSlug } = resolvedParams;
 
   const tenant = await prisma.tenant.findUnique({
     where: { slug: tenantSlug },

@@ -7,19 +7,26 @@ import Link from "next/link";
 import MarketplaceFilters from "./MarketplaceFilters";
 
 interface MarketplacePageProps {
-  searchParams: Promise<{
-    category?: string;
-    studio?: string;
-    q?: string;
-    sort?: string;
-  }>;
+  searchParams:
+    | {
+        category?: string;
+        studio?: string;
+        q?: string;
+        sort?: string;
+      }
+    | Promise<{
+        category?: string;
+        studio?: string;
+        q?: string;
+        sort?: string;
+      }>;
 }
 
 export const revalidate = 30; // 30s ISR
 export const runtime = "edge";
 
 export default async function MarketplacePage({ searchParams }: MarketplacePageProps) {
-  const params = await searchParams;
+  const params = await Promise.resolve(searchParams);
   const currentCategory = params.category || "All";
   const currentStudio = params.studio || "All";
   const searchQuery = params.q || "";

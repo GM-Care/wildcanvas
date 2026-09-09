@@ -10,14 +10,15 @@ import { ArrowLeft, Shield, Sparkles, ExternalLink, Calendar, Download, Eye } fr
 import Link from "next/link";
 
 interface PhotoDetailPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string } | Promise<{ slug: string }>;
 }
 
 export const revalidate = 30;
 export const runtime = "edge";
 
 export default async function PhotoDetailPage({ params }: PhotoDetailPageProps) {
-  const { slug } = await params;
+  const resolvedParams = await Promise.resolve(params);
+  const { slug } = resolvedParams;
 
   const photo = await prisma.photo.findFirst({
     where: { slug },

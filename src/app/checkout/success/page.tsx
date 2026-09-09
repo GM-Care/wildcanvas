@@ -6,11 +6,12 @@ import { CheckCircle2, Download, ShieldCheck, ArrowRight, Layers, Camera } from 
 export const runtime = "edge";
 
 interface CheckoutSuccessPageProps {
-  searchParams: Promise<{ orderNumber?: string }>;
+  searchParams: { orderNumber?: string } | Promise<{ orderNumber?: string }>;
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: CheckoutSuccessPageProps) {
-  const { orderNumber } = await searchParams;
+  const resolvedSearchParams = await Promise.resolve(searchParams);
+  const { orderNumber } = resolvedSearchParams;
 
   const order = orderNumber
     ? await prisma.order.findUnique({
