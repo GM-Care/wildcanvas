@@ -17,6 +17,7 @@ import {
 import { isR2Configured } from "@/lib/r2";
 
 export const revalidate = 10;
+export const runtime = "edge";
 
 export default async function AdminDashboardPage() {
   const [

@@ -4,6 +4,8 @@ import { getSession } from "@/lib/session";
 import Link from "next/link";
 import { Download, Layers, ShieldCheck, Clock, ExternalLink, Camera, ShoppingBag } from "lucide-react";
 
+export const runtime = "edge";
+
 export default async function BuyerVaultPage() {
   const session = await getSession();
 

@@ -4,6 +4,8 @@ import { getSession } from "@/lib/session";
 import Link from "next/link";
 import { Camera, Plus, Trash2, Eye, Download, ArrowLeft, ExternalLink } from "lucide-react";
 
+export const runtime = "edge";
+
 export default async function StudioPhotosPage() {
   const session = await getSession();
 

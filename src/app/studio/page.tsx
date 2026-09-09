@@ -16,6 +16,8 @@ import {
   Plus,
 } from "lucide-react";
 
+export const runtime = "edge";
+
 export default async function StudioDashboardPage() {
   const session = await getSession();
 

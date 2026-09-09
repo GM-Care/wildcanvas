@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { isR2Configured } from "@/lib/r2";
 
+export const runtime = "edge";
+
 export default function ArchitecturePage() {
   const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "wildcanvas-storage";
 

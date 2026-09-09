@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/auth";
 import { setSessionCookie } from "@/lib/session";
 
+export const runtime = "edge";
+
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();

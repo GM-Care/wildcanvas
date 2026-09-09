@@ -16,6 +16,7 @@ interface MarketplacePageProps {
 }
 
 export const revalidate = 30; // 30s ISR
+export const runtime = "edge";
 
 export default async function MarketplacePage({ searchParams }: MarketplacePageProps) {
   const params = await searchParams;

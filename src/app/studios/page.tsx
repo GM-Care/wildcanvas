@@ -5,6 +5,7 @@ import { Camera, ShieldCheck, ArrowRight, Layers, Sparkles } from "lucide-react"
 import { TenantDto } from "@/types";
 
 export const revalidate = 60;
+export const runtime = "edge";
 
 export default async function StudiosDirectoryPage() {
   const tenants = await prisma.tenant.findMany({

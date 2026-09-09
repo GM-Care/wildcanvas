@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CheckCircle2, Download, ShieldCheck, ArrowRight, Layers, Camera } from "lucide-react";
 
+export const runtime = "edge";
+
 interface CheckoutSuccessPageProps {
   searchParams: Promise<{ orderNumber?: string }>;
 }

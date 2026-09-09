@@ -10,6 +10,7 @@ interface TenantStorefrontPageProps {
 }
 
 export const revalidate = 30;
+export const runtime = "edge";
 
 export default async function TenantStorefrontPage({ params }: TenantStorefrontPageProps) {
   const { tenantSlug } = await params;

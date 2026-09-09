@@ -14,6 +14,7 @@ interface PhotoDetailPageProps {
 }
 
 export const revalidate = 30;
+export const runtime = "edge";
 
 export default async function PhotoDetailPage({ params }: PhotoDetailPageProps) {
   const { slug } = await params;

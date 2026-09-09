@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import crypto from "crypto";
+
+export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
         });
 
         // Generate high-resolution cryptographic download grant token
-        const tokenHash = `grant_${crypto.randomBytes(24).toString("hex")}`;
+        const tokenHash = `grant_${Math.random().toString(36).substring(2)}${Math.random().toString(36).substring(2)}`;
         const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days valid
 
         await tx.downloadGrant.create({

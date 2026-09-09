@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { extractExifFromBuffer } from "@/lib/watermark";
-import crypto from "crypto";
+
+export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
     let exifData = {};
     let previewUrl = "";
     let originalUrl = "";
-    const photoUid = crypto.randomBytes(8).toString("hex");
+    const photoUid = Math.random().toString(36).substring(2, 10);
     const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${photoUid}`;
 
     if (file && file.size > 0) {

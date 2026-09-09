@@ -16,6 +16,7 @@ import {
 import { PhotoDto, TenantDto } from "@/types";
 
 export const revalidate = 60; // 1 min ISR
+export const runtime = "edge";
 
 async function getHomeData() {
   try {
