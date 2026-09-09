@@ -37,10 +37,10 @@ export async function POST(req: Request) {
     const description = (formData.get("description") as string) || "";
     const category = (formData.get("category") as string) || "Landscape";
     const tagsRaw = (formData.get("tags") as string) || "[]";
-    const pricePersonal = Number(formData.get("pricePersonal") || 15);
-    const priceEditorial = Number(formData.get("priceEditorial") || 45);
-    const priceCommercial = Number(formData.get("priceCommercial") || 150);
-    const priceBuyout = Number(formData.get("priceBuyout") || 350);
+    const pricePersonal = Number(formData.get("pricePersonal") || 999);
+    const priceEditorial = Number(formData.get("priceEditorial") || 2499);
+    const priceCommercial = Number(formData.get("priceCommercial") || 7999);
+    const priceBuyout = Number(formData.get("priceBuyout") || 24999);
 
     let exifData = {};
     let previewUrl = "";

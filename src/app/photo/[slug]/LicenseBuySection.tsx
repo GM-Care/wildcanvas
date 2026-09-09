@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { PhotoDto, LicenseTierDto } from "@/types";
 import { useCart } from "@/context/CartContext";
 import { Check, ShoppingBag, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { formatINR } from "@/lib/currency";
 
 export default function LicenseBuySection({ photo }: { photo: PhotoDto }) {
   const { addItem, setIsCartOpen } = useCart();
@@ -41,7 +42,7 @@ export default function LicenseBuySection({ photo }: { photo: PhotoDto }) {
           Digital License Options
         </h3>
         <span className="text-xs text-amber-400 font-bold">
-          ${(selectedTier ? selectedTier.priceCents / 100 : 0).toFixed(2)} USD
+          {formatINR(selectedTier ? selectedTier.priceCents : 0)}
         </span>
       </div>
 
@@ -75,7 +76,7 @@ export default function LicenseBuySection({ photo }: { photo: PhotoDto }) {
                   </span>
                 </div>
                 <span className="text-xs font-bold text-white">
-                  ${(tier.priceCents / 100).toFixed(2)}
+                  {formatINR(tier.priceCents)}
                 </span>
               </div>
 
@@ -95,7 +96,7 @@ export default function LicenseBuySection({ photo }: { photo: PhotoDto }) {
         >
           <Zap className="h-4 w-4 fill-zinc-950" />
           <span>
-            Instant Checkout • ${(selectedTier ? selectedTier.priceCents / 100 : 0).toFixed(2)}
+            Instant Checkout • {formatINR(selectedTier ? selectedTier.priceCents : 0)}
           </span>
         </button>
 

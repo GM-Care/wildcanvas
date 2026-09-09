@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Camera,
   Upload,
-  DollarSign,
   Layers,
   ArrowUpRight,
   TrendingUp,
@@ -15,6 +14,7 @@ import {
   Download,
   Plus,
 } from "lucide-react";
+import { formatINR } from "@/lib/currency";
 
 export const runtime = "edge";
 
@@ -108,10 +108,10 @@ export default async function StudioDashboardPage() {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 backdrop-blur-md">
           <div className="flex items-center justify-between text-zinc-400 mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider">Gross Sales</span>
-            <DollarSign className="h-4 w-4 text-emerald-400" />
+            <span className="text-emerald-400 font-bold text-xs">₹ INR</span>
           </div>
           <div className="text-2xl font-extrabold text-white">
-            ${(totalSalesCents / 100).toFixed(2)}
+            {formatINR(totalSalesCents)}
           </div>
           <p className="text-[11px] text-zinc-500 mt-1">Total revenue generated from licenses</p>
         </div>
@@ -122,7 +122,7 @@ export default async function StudioDashboardPage() {
             <TrendingUp className="h-4 w-4 text-amber-400" />
           </div>
           <div className="text-2xl font-extrabold text-amber-400">
-            ${(totalPayoutCents / 100).toFixed(2)}
+            {formatINR(totalPayoutCents)}
           </div>
           <p className="text-[11px] text-zinc-500 mt-1">
             Net payout at {((1 - tenant.commissionRate) * 100).toFixed(0)}% creator rate
@@ -264,7 +264,7 @@ export default async function StudioDashboardPage() {
                       {photo.width} × {photo.height}
                     </td>
                     <td className="px-5 py-3.5 font-semibold text-amber-400">
-                      ${(minPrice / 100).toFixed(0)} – ${(maxPrice / 100).toFixed(0)}
+                      {formatINR(minPrice)} – {formatINR(maxPrice)}
                     </td>
                     <td className="px-5 py-3.5 text-zinc-400">
                       <div className="flex items-center space-x-3">

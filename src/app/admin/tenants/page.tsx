@@ -44,13 +44,35 @@ export default function AdminTenantsManagementPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 space-y-8">
-      <Link
-        href="/admin"
-        className="inline-flex items-center space-x-1.5 text-xs font-semibold text-zinc-400 hover:text-white"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        <span>Back to Admin Console</span>
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          href="/admin"
+          className="inline-flex items-center space-x-1.5 text-xs font-semibold text-zinc-400 hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Admin Console</span>
+        </Link>
+
+        {/* Quick Nav Tabs */}
+        <div className="flex items-center space-x-2 bg-zinc-900/90 border border-zinc-800 p-1 rounded-xl text-xs">
+          <Link
+            href="/admin"
+            className="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-colors"
+          >
+            Overview
+          </Link>
+          <span className="px-3 py-1.5 rounded-lg bg-zinc-800 text-white font-bold">
+            Tenants
+          </span>
+          <Link
+            href="/admin/payments"
+            className="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5"
+          >
+            <span>Razorpay Gateway</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+          </Link>
+        </div>
+      </div>
 
       <div className="space-y-2">
         <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-rose-400">

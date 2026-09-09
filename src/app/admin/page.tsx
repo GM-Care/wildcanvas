@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import {
   Shield,
-  DollarSign,
   TrendingUp,
   Camera,
   Layers,
@@ -13,8 +12,11 @@ import {
   AlertCircle,
   ArrowUpRight,
   Sliders,
+  CreditCard,
 } from "lucide-react";
 import { isR2Configured } from "@/lib/r2";
+import { formatINR } from "@/lib/currency";
+import { getPaymentSettings } from "@/lib/paymentSettings";
 
 export const revalidate = 10;
 export const runtime = "edge";
@@ -25,6 +27,7 @@ export default async function AdminDashboardPage() {
     photosCount,
     usersCount,
     orders,
+    paymentConfig,
   ] = await Promise.all([
     prisma.tenant.findMany({
       include: {
@@ -38,11 +41,14 @@ export default async function AdminDashboardPage() {
     prisma.order.findMany({
       where: { status: "COMPLETED" },
     }),
+    getPaymentSettings(),
   ]);
 
   const totalGmvCents = orders.reduce((acc, o) => acc + o.totalAmountCents, 0);
   const totalPlatformFeeCents = orders.reduce((acc, o) => acc + o.platformFeeCents, 0);
   const totalCreatorPayoutsCents = orders.reduce((acc, o) => acc + o.tenantPayoutCents, 0);
+
+  const isRazorpayConfigured = Boolean(paymentConfig.keyId && paymentConfig.keySecret);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 space-y-10">
@@ -55,37 +61,79 @@ export default async function AdminDashboardPage() {
             </div>
             <h1 className="text-2xl font-extrabold text-white">Super Admin Console</h1>
             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
-              Platform Oversight
+              Master Oversight
             </span>
           </div>
           <p className="text-xs text-zinc-400">
-            Global governance, platform commission reconciliation, tenant approval, and storage telemetry.
+            Global governance, Razorpay India payments, platform commissions, and multi-tenant telemetry.
           </p>
         </div>
 
-        {/* Cloudflare R2 Status Pill */}
-        <div className="flex items-center space-x-2 rounded-2xl border border-zinc-800 bg-zinc-900/90 px-4 py-2 text-xs">
-          <Cloud className={`h-4 w-4 ${isR2Configured ? "text-emerald-400" : "text-amber-400"}`} />
-          <div>
-            <div className="font-semibold text-white">Cloudflare R2 Storage</div>
-            <div className="text-[10px] text-zinc-400">
-              {isR2Configured ? "Connected (Live Bucket)" : "Zero-Config Emulation Mode"}
+        {/* Status Pills */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Razorpay Gateway Status Pill */}
+          <Link
+            href="/admin/payments"
+            className="flex items-center space-x-2 rounded-2xl border border-zinc-800 bg-zinc-900/90 hover:border-amber-500/40 px-4 py-2 text-xs transition-colors"
+          >
+            <CreditCard className={`h-4 w-4 ${isRazorpayConfigured ? "text-emerald-400" : "text-amber-400"}`} />
+            <div>
+              <div className="font-semibold text-white flex items-center space-x-1">
+                <span>Razorpay (₹ INR)</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">
+                  {paymentConfig.mode.toUpperCase()}
+                </span>
+              </div>
+              <div className="text-[10px] text-zinc-400">
+                {isRazorpayConfigured ? "Live / Connected" : "Sandbox Simulator"}
+              </div>
+            </div>
+          </Link>
+
+          {/* Cloudflare R2 Status Pill */}
+          <div className="flex items-center space-x-2 rounded-2xl border border-zinc-800 bg-zinc-900/90 px-4 py-2 text-xs">
+            <Cloud className={`h-4 w-4 ${isR2Configured ? "text-emerald-400" : "text-amber-400"}`} />
+            <div>
+              <div className="font-semibold text-white">Cloudflare R2 Storage</div>
+              <div className="text-[10px] text-zinc-400">
+                {isR2Configured ? "Connected (Live Bucket)" : "Zero-Config Emulation"}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Global Financial & Platform KPIs */}
+      {/* Navigation Sub-Tabs */}
+      <div className="flex items-center space-x-2 bg-zinc-900/80 border border-zinc-800 p-1 rounded-2xl text-xs w-fit">
+        <span className="px-4 py-2 rounded-xl bg-zinc-800 text-white font-bold">
+          Overview
+        </span>
+        <Link
+          href="/admin/tenants"
+          className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors"
+        >
+          Tenants & Studios
+        </Link>
+        <Link
+          href="/admin/payments"
+          className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5"
+        >
+          <span>Razorpay Gateway</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+        </Link>
+      </div>
+
+      {/* Global Financial & Platform KPIs (INR) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 backdrop-blur-md">
           <div className="flex items-center justify-between text-zinc-400 mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider">Gross Platform GMV</span>
-            <DollarSign className="h-4 w-4 text-emerald-400" />
+            <span className="text-emerald-400 font-bold text-sm">₹ INR</span>
           </div>
           <div className="text-3xl font-extrabold text-white">
-            ${(totalGmvCents / 100).toFixed(2)}
+            {formatINR(totalGmvCents)}
           </div>
-          <p className="text-[11px] text-zinc-500 mt-1">Across all multi-tenant sales</p>
+          <p className="text-[11px] text-zinc-500 mt-1">Across all Indian creator sales</p>
         </div>
 
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 backdrop-blur-md border-amber-500/20">
@@ -94,7 +142,7 @@ export default async function AdminDashboardPage() {
             <TrendingUp className="h-4 w-4 text-amber-400" />
           </div>
           <div className="text-3xl font-extrabold text-amber-400">
-            ${(totalPlatformFeeCents / 100).toFixed(2)}
+            {formatINR(totalPlatformFeeCents)}
           </div>
           <p className="text-[11px] text-zinc-500 mt-1">15% net retained platform revenue</p>
         </div>
@@ -102,10 +150,10 @@ export default async function AdminDashboardPage() {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 backdrop-blur-md">
           <div className="flex items-center justify-between text-zinc-400 mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider">Creator Payouts</span>
-            <DollarSign className="h-4 w-4 text-sky-400" />
+            <span className="text-sky-400 font-bold text-sm">₹ INR</span>
           </div>
           <div className="text-3xl font-extrabold text-sky-400">
-            ${(totalCreatorPayoutsCents / 100).toFixed(2)}
+            {formatINR(totalCreatorPayoutsCents)}
           </div>
           <p className="text-[11px] text-zinc-500 mt-1">85% disbursed to creators</p>
         </div>

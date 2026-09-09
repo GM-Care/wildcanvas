@@ -5,6 +5,7 @@ import { PhotoDto, LicenseTierDto } from "@/types";
 import { useCart } from "@/context/CartContext";
 import { X, Check, Shield, Download, Sparkles, ShoppingBag, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { formatINR } from "@/lib/currency";
 
 interface LicensePickerModalProps {
   photo: PhotoDto;
@@ -113,7 +114,7 @@ export default function LicensePickerModal({ photo, isOpen, onClose }: LicensePi
                     )}
                   </div>
                   <div className="text-base font-extrabold text-white">
-                    ${(tier.priceCents / 100).toFixed(2)}
+                    {formatINR(tier.priceCents)}
                   </div>
                 </div>
 
@@ -161,7 +162,7 @@ export default function LicensePickerModal({ photo, isOpen, onClose }: LicensePi
             >
               <ShoppingBag className="h-4 w-4" />
               <span>
-                Add to Cart • ${(selectedTier ? selectedTier.priceCents / 100 : 0).toFixed(2)}
+                Add to Cart • {formatINR(selectedTier ? selectedTier.priceCents : 0)}
               </span>
             </button>
           </div>

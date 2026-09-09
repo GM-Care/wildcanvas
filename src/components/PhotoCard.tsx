@@ -6,6 +6,7 @@ import { PhotoDto } from "@/types";
 import ExifHud from "./ExifHud";
 import LicensePickerModal from "./LicensePickerModal";
 import { ShoppingBag, Eye, Shield, Maximize2 } from "lucide-react";
+import { formatINR } from "@/lib/currency";
 
 interface PhotoCardProps {
   photo: PhotoDto;
@@ -69,7 +70,7 @@ export default function PhotoCard({ photo, priority = false }: PhotoCardProps) {
               className="flex items-center space-x-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 px-3 py-1.5 text-xs font-bold text-zinc-950 shadow-md transition-colors"
             >
               <ShoppingBag className="h-3.5 w-3.5" />
-              <span>License ${(lowestPrice / 100).toFixed(0)}+</span>
+              <span>License {formatINR(lowestPrice)}+</span>
             </button>
           </div>
         </div>
@@ -84,7 +85,7 @@ export default function PhotoCard({ photo, priority = false }: PhotoCardProps) {
               {photo.title}
             </Link>
             <span className="text-xs font-bold text-amber-400 shrink-0">
-              from ${(lowestPrice / 100).toFixed(0)}
+              from {formatINR(lowestPrice)}
             </span>
           </div>
 

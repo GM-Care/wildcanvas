@@ -103,9 +103,9 @@ export const prisma = new Proxy({} as PrismaClient, {
                   orderItems: [
                     {
                       id: "oi_demo_1",
-                      priceCents: 15000,
-                      tenantCutCents: 12750,
-                      platformCutCents: 2250,
+                      priceCents: 799900,
+                      tenantCutCents: 679915,
+                      platformCutCents: 119985,
                       licenseName: "Standard Commercial License",
                       createdAt: new Date(),
                       order: { id: "ord_1", orderNumber: "ORD-2026-8821", createdAt: new Date() },
@@ -113,10 +113,10 @@ export const prisma = new Proxy({} as PrismaClient, {
                     },
                     {
                       id: "oi_demo_2",
-                      priceCents: 25000,
-                      tenantCutCents: 21250,
-                      platformCutCents: 3750,
-                      licenseName: "Extended Editorial License",
+                      priceCents: 2499900,
+                      tenantCutCents: 2124915,
+                      platformCutCents: 374985,
+                      licenseName: "Exclusive Digital Rights",
                       createdAt: new Date(),
                       order: { id: "ord_2", orderNumber: "ORD-2026-9042", createdAt: new Date() },
                       photo: photos[1] || FALLBACK_PHOTOS[1] || FALLBACK_PHOTOS[0],
@@ -138,18 +138,18 @@ export const prisma = new Proxy({} as PrismaClient, {
                   {
                     id: "ord_1",
                     orderNumber: "ORD-2026-8821",
-                    totalAmountCents: 45000,
-                    platformFeeCents: 6750,
-                    tenantPayoutCents: 38250,
+                    totalAmountCents: 1489900,
+                    platformFeeCents: 223485,
+                    tenantPayoutCents: 1266415,
                     status: "COMPLETED",
                     createdAt: new Date(),
                   },
                   {
                     id: "ord_2",
                     orderNumber: "ORD-2026-9140",
-                    totalAmountCents: 25000,
-                    platformFeeCents: 3750,
-                    tenantPayoutCents: 21250,
+                    totalAmountCents: 799900,
+                    platformFeeCents: 119985,
+                    tenantPayoutCents: 679915,
                     status: "COMPLETED",
                     createdAt: new Date(),
                   }
@@ -160,7 +160,7 @@ export const prisma = new Proxy({} as PrismaClient, {
                 return {
                   id: "ord_demo_edge",
                   orderNumber: `ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-                  totalAmountCents: args[0]?.data?.totalAmountCents || 15000,
+                  totalAmountCents: args[0]?.data?.totalAmountCents || 799900,
                   status: "COMPLETED",
                 };
               }

@@ -81,10 +81,10 @@ export const FALLBACK_PHOTOS = [
       megapixels: "45.7 MP",
     }),
     licenseTiers: [
-      { id: "t1_1", photoId: "p1", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal blogs, screensaver (2048px)", priceCents: 1900, currency: "USD", allowedUsage: "Non-commercial" },
-      { id: "t1_2", photoId: "p1", name: "EDITORIAL", displayName: "Editorial Publication", description: "Magazines, print journalism", priceCents: 5500, currency: "USD", allowedUsage: "Editorial" },
-      { id: "t1_3", photoId: "p1", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Marketing campaigns, billboards", priceCents: 16500, currency: "USD", allowedUsage: "Commercial" },
-      { id: "t1_4", photoId: "p1", name: "EXTENDED_EXCLUSIVE", displayName: "Exclusive Buyout", description: "Full ownership transfer", priceCents: 38000, currency: "USD", allowedUsage: "Exclusive Buyout" },
+      { id: "t1_1", photoId: "p1", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal blogs, wallpaper (2048px)", priceCents: 99900, currency: "INR", allowedUsage: "Non-commercial" },
+      { id: "t1_2", photoId: "p1", name: "EDITORIAL", displayName: "Editorial Publication", description: "Magazines, digital media & print journalism", priceCents: 249900, currency: "INR", allowedUsage: "Editorial" },
+      { id: "t1_3", photoId: "p1", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Marketing campaigns, billboards & brand ads", priceCents: 799900, currency: "INR", allowedUsage: "Commercial" },
+      { id: "t1_4", photoId: "p1", name: "EXTENDED_EXCLUSIVE", displayName: "Exclusive Digital Rights", description: "Full exclusive rights & high-res master file transfer", priceCents: 2499900, currency: "INR", allowedUsage: "Exclusive Buyout" },
     ],
   },
   {
@@ -121,8 +121,8 @@ export const FALLBACK_PHOTOS = [
       megapixels: "45.0 MP",
     }),
     licenseTiers: [
-      { id: "t2_1", photoId: "p2", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal display", priceCents: 1500, currency: "USD", allowedUsage: "Non-commercial" },
-      { id: "t2_2", photoId: "p2", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Marketing campaigns", priceCents: 14500, currency: "USD", allowedUsage: "Commercial" },
+      { id: "t2_1", photoId: "p2", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal non-commercial display", priceCents: 89900, currency: "INR", allowedUsage: "Non-commercial" },
+      { id: "t2_2", photoId: "p2", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Full-resolution commercial advertising campaigns", priceCents: 699900, currency: "INR", allowedUsage: "Commercial" },
     ],
   },
   {
@@ -159,8 +159,8 @@ export const FALLBACK_PHOTOS = [
       megapixels: "100.0 MP",
     }),
     licenseTiers: [
-      { id: "t3_1", photoId: "p3", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal print, inspiration", priceCents: 2500, currency: "USD", allowedUsage: "Non-commercial" },
-      { id: "t3_2", photoId: "p3", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Commercial billboards & pitch decks", priceCents: 22000, currency: "USD", allowedUsage: "Commercial" },
+      { id: "t3_1", photoId: "p3", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal editorial & inspiration", priceCents: 129900, currency: "INR", allowedUsage: "Non-commercial" },
+      { id: "t3_2", photoId: "p3", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "High-resolution architecture commercial licensing", priceCents: 899900, currency: "INR", allowedUsage: "Commercial" },
     ],
   },
   {
@@ -197,8 +197,8 @@ export const FALLBACK_PHOTOS = [
       megapixels: "61.0 MP",
     }),
     licenseTiers: [
-      { id: "t4_1", photoId: "p4", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal desktop wallpaper", priceCents: 2200, currency: "USD", allowedUsage: "Non-commercial" },
-      { id: "t4_2", photoId: "p4", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Tourism & commercial advertising", priceCents: 19500, currency: "USD", allowedUsage: "Commercial" },
+      { id: "t4_1", photoId: "p4", name: "PERSONAL_WEB", displayName: "Personal & Social Web", description: "Personal desktop wallpaper & social web", priceCents: 99900, currency: "INR", allowedUsage: "Non-commercial" },
+      { id: "t4_2", photoId: "p4", name: "COMMERCIAL", displayName: "Commercial Advertising", description: "Tourism & enterprise commercial advertising", priceCents: 749900, currency: "INR", allowedUsage: "Commercial" },
     ],
   },
 ];

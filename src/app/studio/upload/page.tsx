@@ -14,10 +14,10 @@ export default function StudioUploadPage() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Landscape");
   const [tags, setTags] = useState("landscape, high-resolution, master");
-  const [pricePersonal, setPricePersonal] = useState("19");
-  const [priceEditorial, setPriceEditorial] = useState("49");
-  const [priceCommercial, setPriceCommercial] = useState("165");
-  const [priceBuyout, setPriceBuyout] = useState("390");
+  const [pricePersonal, setPricePersonal] = useState("999");
+  const [priceEditorial, setPriceEditorial] = useState("2499");
+  const [priceCommercial, setPriceCommercial] = useState("7999");
+  const [priceBuyout, setPriceBuyout] = useState("24999");
 
   const [exif, setExif] = useState<any>({});
   const [isUploading, setIsUploading] = useState(false);
@@ -267,7 +267,7 @@ export default function StudioUploadPage() {
         <div className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 backdrop-blur-md space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300">
-              License Pricing Matrix (USD)
+              License Pricing Matrix (₹ INR)
             </h3>
             <span className="text-[11px] text-amber-400">
               You retain 85%+ of each sale
@@ -279,7 +279,7 @@ export default function StudioUploadPage() {
               <span className="text-xs font-bold text-white block">Personal / Web</span>
               <p className="text-[10px] text-zinc-400 leading-tight">Screensaver, non-commercial</p>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs text-zinc-400">$</span>
+                <span className="absolute left-3 top-2 text-xs text-zinc-400 font-bold">₹</span>
                 <input
                   type="number"
                   value={pricePersonal}
@@ -293,7 +293,7 @@ export default function StudioUploadPage() {
               <span className="text-xs font-bold text-white block">Editorial</span>
               <p className="text-[10px] text-zinc-400 leading-tight">Books, magazines, articles</p>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs text-zinc-400">$</span>
+                <span className="absolute left-3 top-2 text-xs text-zinc-400 font-bold">₹</span>
                 <input
                   type="number"
                   value={priceEditorial}
@@ -307,7 +307,7 @@ export default function StudioUploadPage() {
               <span className="text-xs font-bold text-amber-400 block">Commercial</span>
               <p className="text-[10px] text-zinc-400 leading-tight">Campaigns, packaging, ads</p>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs text-zinc-400">$</span>
+                <span className="absolute left-3 top-2 text-xs text-zinc-400 font-bold">₹</span>
                 <input
                   type="number"
                   value={priceCommercial}
@@ -321,7 +321,7 @@ export default function StudioUploadPage() {
               <span className="text-xs font-bold text-white block">Exclusive Buyout</span>
               <p className="text-[10px] text-zinc-400 leading-tight">Full rights ownership</p>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs text-zinc-400">$</span>
+                <span className="absolute left-3 top-2 text-xs text-zinc-400 font-bold">₹</span>
                 <input
                   type="number"
                   value={priceBuyout}

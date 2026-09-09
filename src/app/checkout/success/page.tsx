@@ -1,7 +1,8 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { CheckCircle2, Download, ShieldCheck, ArrowRight, Layers, Camera } from "lucide-react";
+import { CheckCircle2, Download, ShieldCheck, ArrowRight, Layers, Camera, CreditCard } from "lucide-react";
+import { formatINR } from "@/lib/currency";
 
 export const runtime = "edge";
 
@@ -36,12 +37,16 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
         </div>
 
         {/* Title */}
-        <div className="space-y-2 max-w-xl mx-auto">
+        <div className="space-y-3 max-w-xl mx-auto">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+            <CreditCard className="h-3.5 w-3.5" />
+            <span>Verified by Razorpay • {order ? formatINR(order.totalAmountCents) : "INR ₹"} Paid</span>
+          </div>
           <h1 className="text-3xl font-extrabold text-white">
             Digital Licensing Authorized
           </h1>
           <p className="text-sm text-zinc-400">
-            Thank you! Your order <span className="font-mono text-amber-400 font-semibold">{orderNumber || "ORD-RECENT"}</span> has been processed. Cryptographic high-resolution download grants have been attached to your account.
+            Thank you! Your order <span className="font-mono text-amber-400 font-semibold">{orderNumber || "ORD-RECENT"}</span> has been verified and settled. Cryptographic high-resolution download grants have been attached to your account.
           </p>
         </div>
 

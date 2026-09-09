@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import Link from "next/link";
 import { Camera, Plus, Trash2, Eye, Download, ArrowLeft, ExternalLink } from "lucide-react";
+import { formatINR } from "@/lib/currency";
 
 export const runtime = "edge";
 
@@ -98,7 +99,7 @@ export default async function StudioPhotosPage() {
                   <div className="mt-3 flex items-center justify-between text-xs text-zinc-400">
                     <span>License Range:</span>
                     <span className="font-bold text-white">
-                      ${(minPrice / 100).toFixed(0)} – ${(maxPrice / 100).toFixed(0)}
+                      {formatINR(minPrice)} – {formatINR(maxPrice)}
                     </span>
                   </div>
 
