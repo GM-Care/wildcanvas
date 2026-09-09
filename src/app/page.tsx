@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PhotoCard from "@/components/PhotoCard";
+import { PhotoDto, TenantDto } from "@/types";
 import {
   Camera,
   Cloud,
@@ -9,329 +10,275 @@ import {
   Sparkles,
   ArrowRight,
   Zap,
-  Lock,
-  Layers,
-  CheckCircle2,
+  SlidersHorizontal,
+  CreditCard,
+  Building2,
 } from "lucide-react";
-import { PhotoDto, TenantDto } from "@/types";
+import MarketplaceFilters from "./marketplace/MarketplaceFilters";
 
-export const revalidate = 60; // 1 min ISR
-export const runtime = "edge";
-
-async function getHomeData() {
-  try {
-    const [featuredPhotos, tenants] = await Promise.all([
-      prisma.photo.findMany({
-        where: { status: "PUBLISHED" },
-        take: 6,
-        orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-        include: {
-          tenant: true,
-          licenseTiers: true,
-        },
-      }),
-      prisma.tenant.findMany({
-        where: { status: "ACTIVE" },
-        take: 3,
-        include: {
-          _count: { select: { photos: true } },
-        },
-      }),
-    ]);
-
-    const formattedPhotos: PhotoDto[] = featuredPhotos.map((p) => ({
-      id: p.id,
-      tenantId: p.tenantId,
-      tenantName: p.tenant.name,
-      tenantSlug: p.tenant.slug,
-      title: p.title,
-      slug: p.slug,
-      description: p.description,
-      category: p.category,
-      tags: JSON.parse(p.tags || "[]"),
-      aspectRatio: p.aspectRatio,
-      width: p.width,
-      height: p.height,
-      format: p.format,
-      fileSizeBytes: p.fileSizeBytes,
-      exif: JSON.parse(p.exif || "{}"),
-      previewUrl: p.previewUrl,
-      originalUrl: p.originalUrl,
-      status: p.status as any,
-      featured: p.featured,
-      viewCount: p.viewCount,
-      downloadCount: p.downloadCount,
-      licenseTiers: p.licenseTiers.map((t) => ({
-        id: t.id,
-        name: t.name,
-        displayName: t.displayName,
-        description: t.description,
-        priceCents: t.priceCents,
-        currency: t.currency,
-        maxResolutionWidth: t.maxResolutionWidth,
-        allowedUsage: t.allowedUsage,
-      })),
-      createdAt: p.createdAt.toISOString(),
-    }));
-
-    const formattedTenants: TenantDto[] = tenants.map((t) => ({
-      id: t.id,
-      name: t.name,
-      slug: t.slug,
-      bio: t.bio,
-      logoUrl: t.logoUrl,
-      bannerUrl: t.bannerUrl,
-      brandColor: t.brandColor,
-      watermarkText: t.watermarkText,
-      payoutEmail: t.payoutEmail,
-      status: t.status as any,
-      commissionRate: t.commissionRate,
-      photoCount: t._count.photos,
-    }));
-
-    return { photos: formattedPhotos, tenants: formattedTenants };
-  } catch (err) {
-    console.error("Failed to load home data:", err);
-    return { photos: [], tenants: [] };
-  }
+interface HomePageProps {
+  searchParams?: Promise<{
+    category?: string;
+    studio?: string;
+    q?: string;
+    sort?: string;
+  }>;
 }
 
-export default async function HomePage() {
-  const { photos, tenants } = await getHomeData();
+export const revalidate = 30; // 30s ISR
+export const runtime = "edge";
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = (await searchParams) || {};
+  const currentCategory = params.category || "All";
+  const currentStudio = params.studio || "All";
+  const searchQuery = params.q || "";
+  const currentSort = params.sort || "newest";
+
+  // Build where clause
+  const where: any = {
+    status: "PUBLISHED",
+  };
+
+  if (currentCategory && currentCategory !== "All") {
+    where.category = currentCategory;
+  }
+
+  if (currentStudio && currentStudio !== "All") {
+    where.tenant = { slug: currentStudio };
+  }
+
+  if (searchQuery) {
+    where.OR = [
+      { title: { contains: searchQuery } },
+      { description: { contains: searchQuery } },
+      { category: { contains: searchQuery } },
+      { tags: { contains: searchQuery } },
+    ];
+  }
+
+  let orderBy: any = { createdAt: "desc" };
+  if (currentSort === "views") {
+    orderBy = { viewCount: "desc" };
+  } else if (currentSort === "downloads") {
+    orderBy = { downloadCount: "desc" };
+  }
+
+  const [photos, tenants] = await Promise.all([
+    prisma.photo.findMany({
+      where,
+      orderBy,
+      include: {
+        tenant: true,
+        licenseTiers: true,
+      },
+    }),
+    prisma.tenant.findMany({
+      where: { status: "ACTIVE" },
+      include: {
+        _count: { select: { photos: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const formattedPhotos: PhotoDto[] = photos.map((p) => ({
+    id: p.id,
+    tenantId: p.tenantId,
+    tenantName: p.tenant.name,
+    tenantSlug: p.tenant.slug,
+    title: p.title,
+    slug: p.slug,
+    description: p.description,
+    category: p.category,
+    tags: JSON.parse(p.tags || "[]"),
+    aspectRatio: p.aspectRatio,
+    width: p.width,
+    height: p.height,
+    format: p.format,
+    fileSizeBytes: p.fileSizeBytes,
+    exif: JSON.parse(p.exif || "{}"),
+    previewUrl: p.previewUrl,
+    originalUrl: p.originalUrl,
+    status: p.status as any,
+    featured: p.featured,
+    viewCount: p.viewCount,
+    downloadCount: p.downloadCount,
+    licenseTiers: p.licenseTiers.map((t) => ({
+      id: t.id,
+      name: t.name,
+      displayName: t.displayName,
+      description: t.description,
+      priceCents: t.priceCents,
+      currency: t.currency,
+      maxResolutionWidth: t.maxResolutionWidth,
+      allowedUsage: t.allowedUsage,
+    })),
+    createdAt: p.createdAt.toISOString(),
+  }));
+
+  const tenantOptions = tenants.map((t) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+  }));
 
   return (
-    <div className="space-y-24 pb-20">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-32">
-        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-gradient-to-tr from-amber-500/30 to-amber-700/10 blur-[130px]" />
-        </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+      {/* Marketplace Hero & Value Props Banner */}
+      <section className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-900/90 via-zinc-900/50 to-zinc-950 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-96 w-96 rounded-full bg-amber-500/10 blur-[100px] pointer-events-none" />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center space-x-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-300 backdrop-blur-md mb-8">
+        <div className="relative z-10 max-w-3xl space-y-4">
+          <div className="inline-flex items-center space-x-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300 backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span>Multi-Tenant Architecture • Cloudflare R2 Storage Powered</span>
+            <span>Digital Photography Marketplace • India Edition (₹ INR)</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
-            World-Class Photography. <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent">
-              Independent Creator Studios.
-            </span>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Explore & License Master Photography.
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            The premier multi-tenant photography platform. Creators launch bespoke branded storefronts with zero-egress Cloudflare R2 storage, automated EXIF telemetry, and cryptographic licensing rights.
+          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl">
+            Acquire uncompressed master photographic works directly from independent creator studios. Every purchase includes high-resolution digital rights, zero-egress Cloudflare R2 delivery, and Razorpay instant checkout.
           </p>
 
-          {/* Action Buttons */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/marketplace"
-              className="flex items-center space-x-2 rounded-2xl bg-amber-400 px-6 py-3.5 text-sm font-bold text-zinc-950 hover:bg-amber-300 transition-all shadow-xl shadow-amber-500/20"
-            >
-              <span>Explore Marketplace</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-
-            <Link
-              href="/studios"
-              className="flex items-center space-x-2 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-6 py-3.5 text-sm font-semibold text-zinc-200 hover:border-zinc-700 hover:text-white transition-all backdrop-blur-md"
-            >
-              <Camera className="h-4 w-4 text-amber-400" />
-              <span>Browse Creator Studios</span>
-            </Link>
-
-            <Link
-              href="/architecture"
-              className="flex items-center space-x-2 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-6 py-3.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/10 transition-all"
-            >
-              <Cloud className="h-4 w-4 text-amber-400" />
-              <span>R2 Architecture</span>
-            </Link>
-          </div>
-
-          {/* Value Props Strip */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 backdrop-blur-sm">
-              <Cloud className="h-5 w-5 text-amber-400 mb-2" />
-              <h4 className="text-xs font-bold text-white">Cloudflare R2 Native</h4>
-              <p className="text-[11px] text-zinc-400 mt-1">Zero egress fees for terabyte-scale high-res master files.</p>
+          {/* Quick Value Pillars Strip */}
+          <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-zinc-400">
+            <div className="flex items-center space-x-1.5 bg-zinc-950/60 border border-zinc-800 px-3 py-1.5 rounded-xl">
+              <CreditCard className="h-3.5 w-3.5 text-amber-400" />
+              <span>Razorpay UPI & Cards (₹)</span>
             </div>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 backdrop-blur-sm">
-              <Shield className="h-5 w-5 text-emerald-400 mb-2" />
-              <h4 className="text-xs font-bold text-white">Anti-Theft Shield</h4>
-              <p className="text-[11px] text-zinc-400 mt-1">Right-click barrier & dynamic preview watermarking.</p>
+            <div className="flex items-center space-x-1.5 bg-zinc-950/60 border border-zinc-800 px-3 py-1.5 rounded-xl">
+              <Cloud className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Cloudflare R2 Master Files</span>
             </div>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 backdrop-blur-sm">
-              <Layers className="h-5 w-5 text-sky-400 mb-2" />
-              <h4 className="text-xs font-bold text-white">Multi-Tenancy</h4>
-              <p className="text-[11px] text-zinc-400 mt-1">Dedicated storefronts, custom branding, independent payouts.</p>
-            </div>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 backdrop-blur-sm">
-              <Lock className="h-5 w-5 text-purple-400 mb-2" />
-              <h4 className="text-xs font-bold text-white">Signed Grants</h4>
-              <p className="text-[11px] text-zinc-400 mt-1">Time-expiring cryptographic download access tokens.</p>
+            <div className="flex items-center space-x-1.5 bg-zinc-950/60 border border-zinc-800 px-3 py-1.5 rounded-xl">
+              <Shield className="h-3.5 w-3.5 text-sky-400" />
+              <span>Cryptographic Licensing Grants</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Curated Photos */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
+      {/* Filter, Search, Studio & Category Toolbar */}
+      <MarketplaceFilters
+        currentCategory={currentCategory}
+        currentStudio={currentStudio}
+        currentSort={currentSort}
+        searchQuery={searchQuery}
+        tenants={tenantOptions}
+      />
+
+      {/* Photography Catalog Grid */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between text-xs text-zinc-400">
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-1">
-              Curated Catalog
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Masterpiece Photography
-            </h2>
+            Showing <strong className="text-white">{formattedPhotos.length}</strong> masterworks
+            {currentCategory !== "All" && (
+              <span> in <strong className="text-amber-400">{currentCategory}</strong></span>
+            )}
+            {currentStudio !== "All" && (
+              <span> by <strong className="text-amber-400">{currentStudio}</strong></span>
+            )}
+            {searchQuery && (
+              <span> matching &ldquo;<strong className="text-white">{searchQuery}</strong>&rdquo;</span>
+            )}
           </div>
-          <Link
-            href="/marketplace"
-            className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center space-x-1"
-          >
-            <span>View All Curated Photos</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+
+          {(currentCategory !== "All" || currentStudio !== "All" || searchQuery) && (
+            <Link
+              href="/"
+              className="text-amber-400 hover:text-amber-300 font-semibold"
+            >
+              Reset All Filters
+            </Link>
+          )}
         </div>
 
-        {photos.length === 0 ? (
-          <div className="text-center py-16 text-zinc-500">
-            No photos loaded yet. Please run database seed.
+        {formattedPhotos.length === 0 ? (
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-16 text-center space-y-4">
+            <Camera className="h-12 w-12 text-zinc-600 mx-auto" />
+            <h3 className="text-lg font-bold text-white">No photographs match your search</h3>
+            <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+              Try adjusting your category selection, search terms, or studio filter to browse other works in the catalog.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center space-x-2 rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-amber-300 transition-colors"
+            >
+              <span>View All Photography</span>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {photos.map((photo, idx) => (
-              <PhotoCard key={photo.id} photo={photo} priority={idx < 2} />
+            {formattedPhotos.map((photo, idx) => (
+              <PhotoCard key={photo.id} photo={photo} priority={idx < 3} />
             ))}
           </div>
         )}
       </section>
 
-      {/* Meet The Creator Studios (Multi-Tenancy Spotlight) */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-8">
+      {/* Independent Creator Studios Showcase */}
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-md space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-1">
-              Multi-Tenant Storefronts
+            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-amber-400">
+              <Building2 className="h-3.5 w-3.5" />
+              <span>Multi-Tenant Storefronts</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h2 className="text-2xl font-extrabold text-white mt-1">
               Featured Creator Studios
             </h2>
+            <p className="text-xs text-zinc-400">
+              Visit independent creator storefronts to explore complete collections, gear specs, and custom licensing.
+            </p>
           </div>
+
           <Link
             href="/studios"
-            className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center space-x-1"
+            className="inline-flex items-center space-x-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300"
           >
-            <span>All Studios</span>
+            <span>Explore All Studios</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {tenants.map((tenant) => (
             <Link
               key={tenant.id}
               href={`/s/${tenant.slug}`}
-              className="group relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 transition-all duration-300 hover:border-zinc-700 hover:shadow-2xl"
+              className="group rounded-2xl border border-zinc-800 bg-zinc-950/60 hover:border-amber-500/50 p-4 transition-all duration-300 flex items-center space-x-4"
             >
-              {/* Banner */}
-              <div className="h-32 w-full overflow-hidden bg-zinc-950 relative">
-                <img
-                  src={tenant.bannerUrl || ""}
-                  alt={tenant.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 select-none"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent" />
-              </div>
-
-              {/* Profile Bar */}
-              <div className="p-6 relative pt-0">
-                <div className="-mt-10 mb-3 flex items-center justify-between">
-                  <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-zinc-900 bg-zinc-800 shadow-xl">
-                    <img
-                      src={tenant.logoUrl || ""}
-                      alt={tenant.name}
-                      className="h-full w-full object-cover"
-                    />
+              <div
+                className="h-12 w-12 rounded-xl overflow-hidden bg-zinc-800 border-2 shrink-0"
+                style={{ borderColor: tenant.brandColor }}
+              >
+                {tenant.logoUrl ? (
+                  <img src={tenant.logoUrl} alt={tenant.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center font-bold text-white">
+                    {tenant.name.charAt(0)}
                   </div>
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border"
-                    style={{
-                      backgroundColor: `${tenant.brandColor}15`,
-                      color: tenant.brandColor,
-                      borderColor: `${tenant.brandColor}30`,
-                    }}
-                  >
-                    Verified Tenant
-                  </span>
-                </div>
+                )}
+              </div>
 
-                <h3 className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm text-white group-hover:text-amber-400 transition-colors truncate">
                   {tenant.name}
-                </h3>
-                <p className="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
-                  {tenant.bio}
-                </p>
-
-                <div className="mt-4 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400">
-                  <span>{tenant.photoCount || 0} Published Works</span>
-                  <span className="text-amber-400 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center space-x-1">
-                    <span>Enter Studio</span>
-                    <ArrowRight className="h-3 w-3" />
-                  </span>
+                </div>
+                <div className="text-[11px] text-zinc-400 line-clamp-1">
+                  {tenant.bio || "Independent photography studio"}
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">
+                  {tenant._count.photos} works published
                 </div>
               </div>
+
+              <ArrowRight className="h-4 w-4 text-zinc-600 group-hover:text-amber-400 transition-colors shrink-0" />
             </Link>
           ))}
-        </div>
-      </section>
-
-      {/* Cloudflare R2 Architecture Spotlight Banner */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="relative rounded-3xl overflow-hidden border border-amber-500/30 bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-amber-950/30 p-8 sm:p-12">
-          <div className="max-w-2xl space-y-4">
-            <div className="inline-flex items-center space-x-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-300">
-              <Cloud className="h-3.5 w-3.5" />
-              <span>Storage Architecture</span>
-            </div>
-
-            <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
-              Zero Egress Fees. Multi-Gigabyte Master Files.
-            </h3>
-
-            <p className="text-sm text-zinc-300 leading-relaxed">
-              Traditional cloud storage vendors charge steep egress fees when buyers download 50MB uncompressed RAW or 16-bit TIFF files. WildCanvas is built from the ground up on Cloudflare R2 S3-compatible object storage, delivering predictable costs, global CDN edge caching, and private vault download presigning.
-            </p>
-
-            <div className="pt-2 flex flex-wrap gap-4 text-xs font-medium text-zinc-300">
-              <div className="flex items-center space-x-1.5">
-                <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                <span>Zero bandwidth egress surcharges</span>
-              </div>
-              <div className="flex items-center space-x-1.5">
-                <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                <span>Time-expiring signed download URLs</span>
-              </div>
-              <div className="flex items-center space-x-1.5">
-                <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                <span>Automated multi-resolution preview caching</span>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <Link
-                href="/architecture"
-                className="inline-flex items-center space-x-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-zinc-200 transition-colors"
-              >
-                <span>Read Full Technical Architecture</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
     </div>

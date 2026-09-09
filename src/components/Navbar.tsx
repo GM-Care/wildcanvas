@@ -48,9 +48,9 @@ export default function Navbar() {
           {/* Nav Links */}
           <nav className="hidden md:flex items-center space-x-1 pl-4">
             <Link
-              href="/marketplace"
+              href="/"
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname.startsWith("/marketplace")
+                pathname === "/" || pathname.startsWith("/marketplace")
                   ? "bg-zinc-800 text-white"
                   : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
               }`}
