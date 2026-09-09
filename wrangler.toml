@@ -1,0 +1,14 @@
+name = "wildcanvas"
+compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# Cloudflare R2 Storage binding configuration
+# [[r2_buckets]]
+# binding = "WILDCANVAS_STORAGE"
+# bucket_name = "wildcanvas-storage"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://wildcanvas.pages.dev"
+NEXT_PUBLIC_PLATFORM_NAME = "WildCanvas"
+NEXT_PUBLIC_DEFAULT_COMMISSION_PERCENT = "15"

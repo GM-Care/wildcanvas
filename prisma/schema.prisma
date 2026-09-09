@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  BUYER
+}
+
+enum TenantStatus {
+  ACTIVE
+  PENDING_REVIEW
+  SUSPENDED
+}
+
+enum PhotoStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(BUYER)
+  avatarUrl    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tenants      Tenant[]  @relation("TenantOwner")
+  orders       Order[]   @relation("BuyerOrders")
+  downloadGrants DownloadGrant[]
+}
+
+model Tenant {
+  id             String       @id @default(cuid())
+  name           String
+  slug           String       @unique
+  bio            String?
+  logoUrl        String?
+  bannerUrl      String?
+  brandColor     String       @default("#f59e0b")
+  watermarkText  String?
+  payoutEmail    String?
+  status         TenantStatus @default(ACTIVE)
+  commissionRate Float        @default(0.15)
+  ownerId        String
+  owner          User         @relation("TenantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  photos         Photo[]
+  collections    Collection[]
+  orderItems     OrderItem[]
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  slug        String
+  description String?
+  coverUrl    String?
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  photos      Photo[]
+
+  @@unique([tenantId, slug])
+}
+
+model Photo {
+  id            String       @id @default(cuid())
+  tenantId      String
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  collectionId  String?
+  collection    Collection?  @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  title         String
+  slug          String
+  description   String?
+  category      String       @default("Landscape")
+  tags          String       @default("[]") // JSON string array of tags
+  aspectRatio   Float        @default(1.5)
+  width         Int          @default(3840)
+  height        Int          @default(2560)
+  format        String       @default("JPEG")
+  fileSizeBytes Int          @default(12582912)
+  exif          String       @default("{}") // JSON: camera, lens, iso, shutter, aperture, focalLength, takenAt
+  previewKey    String
+  previewUrl    String
+  originalKey   String
+  originalUrl   String
+  status        PhotoStatus  @default(PUBLISHED)
+  featured      Boolean      @default(false)
+  viewCount     Int          @default(0)
+  downloadCount Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  licenseTiers  LicenseTier[]
+  orderItems    OrderItem[]
+  downloadGrants DownloadGrant[]
+
+  @@unique([tenantId, slug])
+}
+
+model LicenseTier {
+  id                 String   @id @default(cuid())
+  photoId            String
+  photo              Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  name               String   // PERSONAL_WEB, EDITORIAL, COMMERCIAL, EXTENDED_EXCLUSIVE
+  displayName        String   // "Personal / Web", "Commercial Extended", etc.
+  description        String
+  priceCents         Int      // e.g. 1500 = $15.00
+  currency           String   @default("USD")
+  maxResolutionWidth Int?
+  allowedUsage       String
+
+  orderItems         OrderItem[]
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique
+  buyerId           String?
+  buyer             User?       @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: SetNull)
+  buyerEmail        String
+  buyerName         String
+  totalAmountCents  Int
+  currency          String      @default("USD")
+  status            OrderStatus @default(COMPLETED)
+  platformFeeCents  Int         @default(0)
+  tenantPayoutCents Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  items             OrderItem[]
+}
+
+model OrderItem {
+  id                String       @id @default(cuid())
+  orderId           String
+  order             Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  photoId           String
+  photo             Photo        @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  licenseTierId     String?
+  licenseTier       LicenseTier? @relation(fields: [licenseTierId], references: [id], onDelete: SetNull)
+  tenantId          String
+  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  priceCents        Int
+  licenseName       String
+  photoTitle        String
+
+  downloadGrant     DownloadGrant?
+}
+
+model DownloadGrant {
+  id               String     @id @default(cuid())
+  orderItemId      String     @unique
+  orderItem        OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  photoId          String
+  photo            Photo      @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  buyerId          String?
+  buyer            User?      @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+  buyerEmail       String
+  tokenHash        String     @unique
+  expiresAt        DateTime
+  maxDownloads     Int        @default(5)
+  downloadCount    Int        @default(0)
+  lastDownloadedAt DateTime?
+  createdAt        DateTime   @default(now())
+}
