@@ -124,38 +124,40 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12 space-y-10">
-      {/* Marketplace Hero & Value Props Banner */}
-      <section className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-900/90 via-zinc-900/50 to-zinc-950 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-96 w-96 rounded-full bg-amber-500/10 blur-[100px] pointer-events-none" />
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6 space-y-5">
+      {/* Marketplace Compact Hero Banner */}
+      <section className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-gradient-to-r from-zinc-900/90 via-zinc-900/60 to-zinc-950 p-4 sm:py-4 sm:px-5 backdrop-blur-md shadow-lg">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 h-48 w-48 rounded-full bg-amber-500/5 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center space-x-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300 backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span>Digital Photography Marketplace • India Edition (₹ INR)</span>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="space-y-1 max-w-2xl">
+            <div className="inline-flex items-center space-x-1.5 rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300">
+              <Sparkles className="h-3 w-3 text-amber-400" />
+              <span>Digital Photography Marketplace • India Edition (₹ INR)</span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Explore &amp; License Master Photography.
+            </h1>
+
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-xl">
+              Acquire uncompressed master photographic works directly from independent creator studios. Every purchase includes high-resolution digital rights, zero-egress Cloudflare R2 delivery, and Razorpay instant checkout.
+            </p>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            Explore & License Master Photography.
-          </h1>
-
-          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl">
-            Acquire uncompressed master photographic works directly from independent creator studios. Every purchase includes high-resolution digital rights, zero-egress Cloudflare R2 delivery, and Razorpay instant checkout.
-          </p>
-
-          {/* Quick Value Pillars Strip */}
-          <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-zinc-400">
-            <div className="flex items-center space-x-1.5 bg-zinc-950/60 border border-zinc-800 px-3 py-1.5 rounded-xl">
-              <CreditCard className="h-3.5 w-3.5 text-amber-400" />
-              <span>Razorpay UPI & Cards (₹)</span>
+          {/* Compact Feature Badges */}
+          <div className="flex flex-wrap md:flex-col items-start md:items-end gap-1.5 text-[11px] text-zinc-300 shrink-0">
+            <div className="inline-flex items-center space-x-1.5 bg-zinc-950/80 border border-zinc-800/80 px-2.5 py-1 rounded-lg">
+              <CreditCard className="h-3 w-3 text-amber-400" />
+              <span className="font-medium">Razorpay UPI &amp; Cards (₹)</span>
             </div>
-            <div className="flex items-center space-x-1.5 bg-zinc-950/60 border border-zinc-800 px-3 py-1.5 rounded-xl">
-              <Cloud className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Cloudflare R2 Master Files</span>
+            <div className="inline-flex items-center space-x-1.5 bg-zinc-950/80 border border-zinc-800/80 px-2.5 py-1 rounded-lg">
+              <Cloud className="h-3 w-3 text-emerald-400" />
+              <span className="font-medium">Cloudflare R2 Master Files</span>
             </div>
-            <div className="flex items-center space-x-1.5 bg-zinc-950/60 border border-zinc-800 px-3 py-1.5 rounded-xl">
-              <Shield className="h-3.5 w-3.5 text-sky-400" />
-              <span>Cryptographic Licensing Grants</span>
+            <div className="inline-flex items-center space-x-1.5 bg-zinc-950/80 border border-zinc-800/80 px-2.5 py-1 rounded-lg">
+              <Shield className="h-3 w-3 text-sky-400" />
+              <span className="font-medium">Cryptographic Licensing Grants</span>
             </div>
           </div>
         </div>
@@ -171,7 +173,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       />
 
       {/* Photography Catalog Grid */}
-      <section className="space-y-6">
+      <section className="space-y-3">
         <div className="flex items-center justify-between text-xs text-zinc-400">
           <div>
             Showing <strong className="text-white">{formattedPhotos.length}</strong> masterworks
@@ -219,15 +221,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         )}
       </section>
 
-      {/* Independent Creator Studios Showcase */}
-      <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-md space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Tenant Studios Directory Section */}
+      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5 backdrop-blur-md space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-amber-400">
-              <Building2 className="h-3.5 w-3.5" />
+            <div className="flex items-center space-x-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-400">
+              <Building2 className="h-3 w-3" />
               <span>Multi-Tenant Storefronts</span>
             </div>
-            <h2 className="text-2xl font-extrabold text-white mt-1">
+            <h2 className="text-lg sm:text-xl font-bold text-white mt-0.5">
               Featured Creator Studios
             </h2>
             <p className="text-xs text-zinc-400">
