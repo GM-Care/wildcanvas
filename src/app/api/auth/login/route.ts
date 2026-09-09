@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     // In demo environment, if password matches or fallback
-    const isValid = password ? await verifyPassword(password, user.passwordHash) : true;
+    const isValid = !user.passwordHash ? true : await verifyPassword(password, user.passwordHash);
     if (!isValid) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
