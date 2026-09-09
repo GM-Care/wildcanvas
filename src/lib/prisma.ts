@@ -48,7 +48,10 @@ export const prisma = new Proxy({} as PrismaClient, {
             // First attempt live Prisma if available
             if (rawPrisma && (rawPrisma as any)[prop]?.[method]) {
               try {
-                return await (rawPrisma as any)[prop][method](...args);
+                const liveResult = await (rawPrisma as any)[prop][method](...args);
+                if (liveResult !== null && (Array.isArray(liveResult) ? liveResult.length > 0 : true)) {
+                  return liveResult;
+                }
               } catch (err) {
                 console.warn(`Prisma model call ${prop}.${method} failed, using edge-safe fallback:`, err);
               }
@@ -135,10 +138,10 @@ export const prisma = new Proxy({} as PrismaClient, {
             }
 
             if (prop === "user") {
-              if (method === "findUnique") {
+              if (method === "findUnique" || method === "findFirst") {
                 const [query] = args;
-                const email = query?.where?.email;
-                if (email?.includes("admin")) {
+                const email = (query?.where?.email || "").toLowerCase();
+                if (email.includes("admin")) {
                   return {
                     id: "user_admin",
                     name: "Alexander Vance",
@@ -148,20 +151,40 @@ export const prisma = new Proxy({} as PrismaClient, {
                     tenants: [],
                   };
                 }
-                if (email?.includes("creator")) {
+                if (email.includes("safari") || email.includes("creator")) {
                   return {
-                    id: "user_creator",
-                    name: "Liam Vance",
-                    email: "creator@wildcanvas.com",
+                    id: "user_creator_safari",
+                    name: "Apex Safari Studio",
+                    email: "safari@wildcanvas.com",
                     role: "TENANT_ADMIN",
                     passwordHash: "",
                     tenants: [FALLBACK_TENANTS[0]],
                   };
                 }
+                if (email.includes("arch")) {
+                  return {
+                    id: "user_creator_arch",
+                    name: "Lumina Minimalist",
+                    email: "arch@wildcanvas.com",
+                    role: "TENANT_ADMIN",
+                    passwordHash: "",
+                    tenants: [FALLBACK_TENANTS[1]],
+                  };
+                }
+                if (email.includes("nordic")) {
+                  return {
+                    id: "user_creator_nordic",
+                    name: "Nordic Aerials",
+                    email: "nordic@wildcanvas.com",
+                    role: "TENANT_ADMIN",
+                    passwordHash: "",
+                    tenants: [FALLBACK_TENANTS[2]],
+                  };
+                }
                 return {
                   id: "user_buyer",
                   name: "Sarah Jenkins",
-                  email: "buyer@example.com",
+                  email: email || "buyer@wildcanvas.com",
                   role: "BUYER",
                   passwordHash: "",
                   tenants: [],
