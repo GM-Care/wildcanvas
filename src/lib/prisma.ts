@@ -85,20 +85,44 @@ export const prisma = new Proxy({} as PrismaClient, {
 
             if (prop === "tenant") {
               if (method === "findMany") {
-                return FALLBACK_TENANTS;
+                return FALLBACK_TENANTS.map((t) => ({
+                  ...t,
+                  owner: { name: "Creator Admin", email: `${t.slug}@wildcanvas.com` },
+                  _count: { photos: 4, orderItems: 12 },
+                }));
               }
               if (method === "findUnique" || method === "findFirst") {
                 const [query] = args;
                 const slug = query?.where?.slug;
                 const id = query?.where?.id;
-                const found = FALLBACK_TENANTS.find((t) => t.slug === slug || t.id === id);
-                if (found) {
-                  return {
-                    ...found,
-                    photos: FALLBACK_PHOTOS.filter((p) => p.tenantId === found.id),
-                  };
-                }
-                return FALLBACK_TENANTS[0];
+                const found = FALLBACK_TENANTS.find((t) => t.slug === slug || t.id === id) || FALLBACK_TENANTS[0];
+                const photos = FALLBACK_PHOTOS.filter((p) => p.tenantId === found.id);
+                return {
+                  ...found,
+                  photos: photos.length > 0 ? photos : FALLBACK_PHOTOS,
+                  orderItems: [
+                    {
+                      id: "oi_demo_1",
+                      priceCents: 15000,
+                      tenantCutCents: 12750,
+                      platformCutCents: 2250,
+                      licenseName: "Standard Commercial License",
+                      createdAt: new Date(),
+                      order: { id: "ord_1", orderNumber: "ORD-2026-8821", createdAt: new Date() },
+                      photo: photos[0] || FALLBACK_PHOTOS[0],
+                    },
+                    {
+                      id: "oi_demo_2",
+                      priceCents: 25000,
+                      tenantCutCents: 21250,
+                      platformCutCents: 3750,
+                      licenseName: "Extended Editorial License",
+                      createdAt: new Date(),
+                      order: { id: "ord_2", orderNumber: "ORD-2026-9042", createdAt: new Date() },
+                      photo: photos[1] || FALLBACK_PHOTOS[1] || FALLBACK_PHOTOS[0],
+                    },
+                  ],
+                };
               }
               if (method === "count") {
                 return FALLBACK_TENANTS.length;
@@ -109,8 +133,29 @@ export const prisma = new Proxy({} as PrismaClient, {
             }
 
             if (prop === "order") {
-              if (method === "findMany") return [];
-              if (method === "count") return 1;
+              if (method === "findMany") {
+                return [
+                  {
+                    id: "ord_1",
+                    orderNumber: "ORD-2026-8821",
+                    totalAmountCents: 45000,
+                    platformFeeCents: 6750,
+                    tenantPayoutCents: 38250,
+                    status: "COMPLETED",
+                    createdAt: new Date(),
+                  },
+                  {
+                    id: "ord_2",
+                    orderNumber: "ORD-2026-9140",
+                    totalAmountCents: 25000,
+                    platformFeeCents: 3750,
+                    tenantPayoutCents: 21250,
+                    status: "COMPLETED",
+                    createdAt: new Date(),
+                  }
+                ];
+              }
+              if (method === "count") return 2;
               if (method === "create") {
                 return {
                   id: "ord_demo_edge",
@@ -122,16 +167,53 @@ export const prisma = new Proxy({} as PrismaClient, {
             }
 
             if (prop === "downloadGrant") {
-              if (method === "findMany") return [];
+              if (method === "findMany") {
+                return [
+                  {
+                    id: "grant_demo_1",
+                    tokenHash: "grant_token_golden_lioness",
+                    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                    maxDownloads: 5,
+                    downloadCount: 1,
+                    photo: {
+                      ...FALLBACK_PHOTOS[0],
+                      tenant: FALLBACK_TENANTS[0],
+                    },
+                    orderItem: {
+                      id: "oi_demo_1",
+                      priceCents: 15000,
+                      licenseName: "Standard Commercial License",
+                      order: { orderNumber: "ORD-2026-8821" },
+                    },
+                  },
+                  {
+                    id: "grant_demo_2",
+                    tokenHash: "grant_token_concrete_curves",
+                    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                    maxDownloads: 5,
+                    downloadCount: 0,
+                    photo: {
+                      ...FALLBACK_PHOTOS[1],
+                      tenant: FALLBACK_TENANTS[1],
+                    },
+                    orderItem: {
+                      id: "oi_demo_2",
+                      priceCents: 25000,
+                      licenseName: "Extended Commercial License",
+                      order: { orderNumber: "ORD-2026-9042" },
+                    },
+                  }
+                ];
+              }
               if (method === "findFirst" || method === "findUnique") {
                 return {
-                  id: "grant_demo",
-                  tokenHash: args[0]?.where?.tokenHash || "grant_demo",
+                  id: "grant_demo_1",
+                  tokenHash: args[0]?.where?.tokenHash || "grant_token_golden_lioness",
                   expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
                   maxDownloads: 5,
                   downloadCount: 0,
                   photo: FALLBACK_PHOTOS[0],
-                  orderItem: { licenseName: "Commercial License" },
+                  orderItem: { licenseName: "Standard Commercial License" },
                 };
               }
               if (method === "create" || method === "update") return {};

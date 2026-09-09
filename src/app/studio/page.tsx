@@ -51,10 +51,10 @@ export default async function StudioDashboardPage() {
     );
   }
 
-  const totalSalesCents = tenant.orderItems.reduce((acc, item) => acc + item.priceCents, 0);
-  const totalPayoutCents = Math.round(totalSalesCents * (1 - tenant.commissionRate));
-  const totalDownloads = tenant.photos.reduce((acc, p) => acc + p.downloadCount, 0);
-  const totalViews = tenant.photos.reduce((acc, p) => acc + p.viewCount, 0);
+  const totalSalesCents = (tenant.orderItems || []).reduce((acc, item) => acc + item.priceCents, 0);
+  const totalPayoutCents = Math.round(totalSalesCents * (1 - (tenant.commissionRate || 0.15)));
+  const totalDownloads = (tenant.photos || []).reduce((acc, p) => acc + (p.downloadCount || 0), 0);
+  const totalViews = (tenant.photos || []).reduce((acc, p) => acc + (p.viewCount || 0), 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 space-y-10">
@@ -219,7 +219,7 @@ export default async function StudioDashboardPage() {
             href="/studio/photos"
             className="text-xs font-semibold text-amber-400 hover:underline"
           >
-            View All ({tenant.photos.length})
+            View All ({(tenant.photos || []).length})
           </Link>
         </div>
 
@@ -236,10 +236,10 @@ export default async function StudioDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
-              {tenant.photos.slice(0, 5).map((photo) => {
-                const prices = photo.licenseTiers.map((t) => t.priceCents);
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
+              {(tenant.photos || []).slice(0, 5).map((photo) => {
+                const prices = (photo.licenseTiers || []).map((t) => t.priceCents);
+                const minPrice = prices.length > 0 ? Math.min(...prices) : 4900;
+                const maxPrice = prices.length > 0 ? Math.max(...prices) : 24900;
 
                 return (
                   <tr key={photo.id} className="hover:bg-zinc-800/30 transition-colors">
