@@ -127,7 +127,16 @@ export const prisma = new Proxy({} as PrismaClient, {
               if (method === "count") {
                 return FALLBACK_TENANTS.length;
               }
-              if (method === "update" || method === "create") {
+              if (method === "update") {
+                const [query] = args;
+                const id = query?.where?.id;
+                const slug = query?.where?.slug;
+                const data = query?.data || {};
+                const found = FALLBACK_TENANTS.find((t) => t.id === id || t.slug === slug) || FALLBACK_TENANTS[0];
+                Object.assign(found, data);
+                return found;
+              }
+              if (method === "create") {
                 return FALLBACK_TENANTS[0];
               }
             }

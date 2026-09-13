@@ -47,6 +47,9 @@ export default async function AdminDashboardPage() {
   const totalGmvCents = orders.reduce((acc, o) => acc + o.totalAmountCents, 0);
   const totalPlatformFeeCents = orders.reduce((acc, o) => acc + o.platformFeeCents, 0);
   const totalCreatorPayoutsCents = orders.reduce((acc, o) => acc + o.tenantPayoutCents, 0);
+  const pendingKycCount = tenants.filter(
+    (t: any) => t.kycStatus === "PENDING_APPROVAL" || t.status === "PENDING_REVIEW"
+  ).length;
 
   const isRazorpayConfigured = Boolean(paymentConfig.keyId && paymentConfig.keySecret);
 
@@ -110,9 +113,14 @@ export default async function AdminDashboardPage() {
         </span>
         <Link
           href="/admin/tenants"
-          className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors"
+          className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5"
         >
-          Tenants & Studios
+          <span>Tenants &amp; Studios</span>
+          {pendingKycCount > 0 && (
+            <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+              {pendingKycCount} pending
+            </span>
+          )}
         </Link>
         <Link
           href="/admin/payments"
@@ -122,6 +130,24 @@ export default async function AdminDashboardPage() {
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
         </Link>
       </div>
+
+      {/* Pending KYC Action Alert */}
+      {pendingKycCount > 0 && (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center space-x-3 text-xs text-amber-300">
+            <span className="text-base">⏳</span>
+            <span>
+              <strong>{pendingKycCount} Merchant KYC &amp; Brand Review {pendingKycCount === 1 ? "Request" : "Requests"}</strong> awaiting Master Admin verification.
+            </span>
+          </div>
+          <Link
+            href="/admin/tenants"
+            className="rounded-xl bg-amber-400 hover:bg-amber-300 px-4 py-2 text-xs font-bold text-zinc-950 transition-colors shadow-sm self-start sm:self-auto"
+          >
+            Open Review Queue &rarr;
+          </Link>
+        </div>
+      )}
 
       {/* Global Financial & Platform KPIs (INR) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

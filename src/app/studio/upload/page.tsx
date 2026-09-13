@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Camera, Sparkles, Shield, ArrowLeft, Check, Loader2, Image as ImageIcon } from "lucide-react";
+import { Upload, Camera, Sparkles, Shield, ArrowLeft, Check, Loader2, Image as ImageIcon, HardDrive } from "lucide-react";
 import Link from "next/link";
 import exifr from "exifr";
+import StorageUpgradeModal from "@/components/StorageUpgradeModal";
 
 export default function StudioUploadPage() {
   const router = useRouter();
@@ -22,6 +23,25 @@ export default function StudioUploadPage() {
   const [exif, setExif] = useState<any>({});
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Storage Quota Tracking & Upgrade Modal
+  const [storagePlan, setStoragePlan] = useState("STARTER_FREE");
+  const [storageLimitBytes, setStorageLimitBytes] = useState(5 * 1024 * 1024 * 1024);
+  const [storageUsedBytes, setStorageUsedBytes] = useState(0);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    fetch("/api/studio/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.tenant) {
+          setStoragePlan(data.tenant.storagePlan || "STARTER_FREE");
+          setStorageLimitBytes(data.tenant.storageLimitBytes || 5368709120);
+          setStorageUsedBytes(data.tenant.storageUsedBytes || 0);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -61,6 +81,17 @@ export default function StudioUploadPage() {
     e.preventDefault();
     if (!title) {
       setErrorMsg("Please provide a photo title.");
+      return;
+    }
+
+    // Storage Quota Pre-Flight Check (5GB Free / Premium Tier)
+    if (file && (storageUsedBytes + file.size > storageLimitBytes)) {
+      setErrorMsg(
+        `Storage Quota Exceeded! Your current ${storagePlan.replace("_", " ")} plan limit is ${(
+          storageLimitBytes / (1024 * 1024 * 1024)
+        ).toFixed(1)} GB. Please upgrade your storage tier to continue uploading master photographic files.`
+      );
+      setIsUpgradeModalOpen(true);
       return;
     }
 
@@ -121,6 +152,29 @@ export default function StudioUploadPage() {
         <p className="text-xs text-zinc-400">
           Direct ingestion to Cloudflare R2 object storage. Original RAW/JPEG files are encrypted in your private vault; web-optimized watermarked previews are deployed to the global CDN edge.
         </p>
+      </div>
+
+      {/* Storage Quota Bar */}
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center space-x-2.5 text-xs text-zinc-300">
+          <HardDrive className="h-4 w-4 text-amber-400 shrink-0" />
+          <span>
+            Available R2 Vault Quota:{" "}
+            <strong className="text-white">
+              {Math.max(0, (storageLimitBytes - storageUsedBytes) / (1024 * 1024 * 1024)).toFixed(2)} GB free
+            </strong>{" "}
+            of {(storageLimitBytes / (1024 * 1024 * 1024)).toFixed(0)} GB ({storagePlan.replace("_", " ")})
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsUpgradeModalOpen(true)}
+          className="text-xs text-amber-400 hover:text-amber-300 font-bold self-start sm:self-auto flex items-center space-x-1"
+        >
+          <span>Upgrade Tier (Up to 1TB)</span>
+          <span>&rarr;</span>
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -361,6 +415,18 @@ export default function StudioUploadPage() {
           </button>
         </div>
       </form>
+
+      {/* Storage Upgrade Modal */}
+      <StorageUpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        currentPlanId={storagePlan}
+        storageUsedBytes={storageUsedBytes}
+        onPlanUpgraded={(plan) => {
+          setStoragePlan(plan.id);
+          setStorageLimitBytes(plan.limitBytes);
+        }}
+      />
     </div>
   );
 }

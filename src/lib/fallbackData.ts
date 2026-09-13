@@ -10,9 +10,27 @@ export const FALLBACK_TENANTS = [
     status: "ACTIVE",
     commissionRate: 0.15,
     logoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
     bannerUrl: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1600&q=80",
     owner: { name: "Liam Vance", email: "creator@wildcanvas.com" },
     _count: { photos: 3, orderItems: 2 },
+    // KYC & Approval State
+    kycStatus: "VERIFIED",
+    legalName: "Liam Vance Wild Photography LLC",
+    entityType: "PROPRIETORSHIP",
+    panNumber: "ABCDE1234F",
+    gstin: "29ABCDE1234F1Z5",
+    bankName: "HDFC Bank",
+    accountNumber: "50200088991122",
+    ifscCode: "HDFC0000240",
+    accountHolderName: "Liam Vance",
+    kycDocUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80",
+    kycSubmittedAt: "2026-08-10T12:00:00.000Z",
+    kycReviewedAt: "2026-08-11T14:30:00.000Z",
+    // Storage Quota
+    storagePlan: "STARTER_FREE",
+    storageLimitBytes: 5368709120, // 5 GB
+    storageUsedBytes: 2254857830, // 2.10 GB
   },
   {
     id: "tenant_luminary",
@@ -22,12 +40,32 @@ export const FALLBACK_TENANTS = [
     brandColor: "#38bdf8",
     watermarkText: "© LUMINARY ARCH LENS",
     payoutEmail: "accounts@luminaryarch.design",
-    status: "ACTIVE",
+    status: "PENDING_REVIEW",
     commissionRate: 0.12,
     logoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
+    avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
     bannerUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80",
     owner: { name: "Maya Lin", email: "luminary@wildcanvas.com" },
     _count: { photos: 2, orderItems: 1 },
+    // KYC & Pending Approval Changes
+    kycStatus: "PENDING_APPROVAL",
+    legalName: "Maya Lin Architectural Visuals",
+    entityType: "INDIVIDUAL",
+    panNumber: "MLKJA9876Q",
+    gstin: "27MLKJA9876Q1Z8",
+    bankName: "State Bank of India",
+    accountNumber: "38192019283",
+    ifscCode: "SBIN0001040",
+    accountHolderName: "Maya Lin",
+    pendingName: "Maya Lin Studio & Arch",
+    pendingLogoUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80",
+    pendingAvatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80",
+    kycDocUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80",
+    kycSubmittedAt: "2026-09-12T08:15:00.000Z",
+    // Storage Quota: Free Tier near 5GB limit
+    storagePlan: "STARTER_FREE",
+    storageLimitBytes: 5368709120, // 5 GB
+    storageUsedBytes: 4617089843, // 4.30 GB (86% full)
   },
   {
     id: "tenant_nordic",
@@ -38,11 +76,29 @@ export const FALLBACK_TENANTS = [
     watermarkText: "© NORDIC HORIZON",
     payoutEmail: "astrid@nordichorizon.se",
     status: "ACTIVE",
-    commissionRate: 0.15,
+    commissionRate: 0.12,
     logoUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+    avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
     bannerUrl: "https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=1600&q=80",
     owner: { name: "Astrid Lindqvist", email: "astrid@wildcanvas.com" },
     _count: { photos: 2, orderItems: 1 },
+    // KYC & Approval State
+    kycStatus: "VERIFIED",
+    legalName: "Nordic Horizon Arctic Media Pvt Ltd",
+    entityType: "PRIVATE_LIMITED",
+    panNumber: "NORDH5544R",
+    gstin: "07NORDH5544R1Z2",
+    bankName: "ICICI Bank",
+    accountNumber: "000405012345",
+    ifscCode: "ICIC0000004",
+    accountHolderName: "Astrid Lindqvist",
+    kycDocUrl: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80",
+    kycSubmittedAt: "2026-08-01T10:00:00.000Z",
+    kycReviewedAt: "2026-08-02T16:00:00.000Z",
+    // Storage Quota: Pro Creator (50 GB)
+    storagePlan: "PRO_CREATOR",
+    storageLimitBytes: 53687091200, // 50 GB
+    storageUsedBytes: 12884901888, // 12.0 GB
   },
 ];
 

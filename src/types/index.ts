@@ -55,6 +55,12 @@ export interface PhotoDto {
   createdAt: string;
 }
 
+export type KycStatus = "UNVERIFIED" | "PENDING_APPROVAL" | "VERIFIED" | "REJECTED";
+
+export type EntityType = "INDIVIDUAL" | "PROPRIETORSHIP" | "PARTNERSHIP" | "PRIVATE_LIMITED" | "LLP";
+
+export type StoragePlanId = "STARTER_FREE" | "PRO_CREATOR" | "STUDIO_MASTER" | "AGENCY_ENTERPRISE";
+
 export interface TenantDto {
   id: string;
   name: string;
@@ -69,6 +75,32 @@ export interface TenantDto {
   commissionRate: number;
   photoCount?: number;
   totalSalesCents?: number;
+
+  // Merchant Avatar & Pending Brand Changes
+  avatarUrl?: string | null;
+  pendingName?: string | null;
+  pendingLogoUrl?: string | null;
+  pendingAvatarUrl?: string | null;
+
+  // Mandatory India KYC Details
+  kycStatus?: KycStatus;
+  legalName?: string | null;
+  entityType?: EntityType | string | null;
+  panNumber?: string | null;
+  gstin?: string | null;
+  bankName?: string | null;
+  accountNumber?: string | null;
+  ifscCode?: string | null;
+  accountHolderName?: string | null;
+  kycDocUrl?: string | null;
+  kycSubmittedAt?: string | null;
+  kycReviewedAt?: string | null;
+  kycRejectReason?: string | null;
+
+  // Cloudflare R2 Storage Quotas
+  storagePlan?: StoragePlanId;
+  storageLimitBytes?: number;
+  storageUsedBytes?: number;
 }
 
 export interface CartItem {

@@ -73,17 +73,37 @@ export default async function StudioDashboardPage() {
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-2xl font-extrabold text-white">{tenant.name}</h1>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Active Tenant
-              </span>
+              {(tenant as any).kycStatus === "VERIFIED" ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center space-x-1">
+                  <span>✓</span>
+                  <span>KYC Verified</span>
+                </span>
+              ) : (tenant as any).kycStatus === "PENDING_APPROVAL" ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center space-x-1">
+                  <span>⏳</span>
+                  <span>KYC Under Review</span>
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                  KYC Unverified
+                </span>
+              )}
             </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Creator Studio Console • Commission Rate: {(tenant.commissionRate * 100).toFixed(0)}%
+              Creator Studio Console • Commission Rate: {((tenant.commissionRate || 0.15) * 100).toFixed(0)}% • Storage Tier: {((tenant as any).storagePlan || "STARTER_FREE").replace("_", " ")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-3">
+          <Link
+            href="/studio/settings"
+            className="flex items-center space-x-1.5 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
+          >
+            <Settings className="h-3.5 w-3.5 text-zinc-400" />
+            <span>Branding &amp; KYC</span>
+          </Link>
+
           <Link
             href={`/s/${tenant.slug}`}
             target="_blank"
@@ -102,6 +122,55 @@ export default async function StudioDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Cloudflare R2 Master Storage Quota Banner */}
+      {(() => {
+        const storageLimit = (tenant as any).storageLimitBytes || 5 * 1024 * 1024 * 1024;
+        const storageUsed = (tenant as any).storageUsedBytes || (tenant.photos || []).reduce((acc: number, p: any) => acc + (p.fileSizeBytes || 15000000), 0);
+        const usedPercent = Math.min(100, Math.round((storageUsed / storageLimit) * 100));
+        return (
+          <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1.5 flex-1">
+              <div className="flex items-center space-x-2">
+                <span className="text-amber-400 font-bold text-xs">Cloudflare R2 Master Storage</span>
+                <span className="text-[10px] uppercase font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/25 px-2 py-0.5 rounded">
+                  {((tenant as any).storagePlan || "STARTER_FREE").replace("_", " ")}
+                </span>
+                {usedPercent >= 80 && (
+                  <span className="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">
+                    Storage Almost Full
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-3 text-xs text-zinc-300">
+                <span>
+                  Using <strong className="text-white">{(storageUsed / (1024 * 1024 * 1024)).toFixed(2)} GB</strong> of{" "}
+                  <strong className="text-amber-400">{(storageLimit / (1024 * 1024 * 1024)).toFixed(0)} GB</strong>
+                </span>
+                <span className="text-zinc-500">({usedPercent}% utilized)</span>
+              </div>
+
+              <div className="w-full max-w-lg bg-zinc-950 h-2 rounded-full overflow-hidden border border-zinc-800">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    usedPercent > 85 ? "bg-red-500" : "bg-amber-400"
+                  }`}
+                  style={{ width: `${usedPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <Link
+              href="/studio/settings"
+              className="inline-flex items-center space-x-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 text-xs font-semibold transition-colors shrink-0"
+            >
+              <span>Upgrade Quota (50GB / 250GB / 1TB)</span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-amber-400" />
+            </Link>
+          </div>
+        );
+      })()}
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
