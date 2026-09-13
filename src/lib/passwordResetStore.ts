@@ -1,95 +1,94 @@
-/**
- * Password Reset Challenge Store
- * Edge-compatible ephemeral storage with 15-minute expiration & rate limiting
- */
+import { SignJWT, jwtVerify } from "jose";
 
-export interface PasswordResetChallenge {
+const RESET_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || "wildcanvas-super-secret-key-change-in-production-2026"
+);
+
+export interface ResetTicketData {
   email: string;
-  otp: string; // 6-digit verification code
-  token: string; // Secure URL token for 1-click links
-  expiresAt: number;
-  attempts: number;
+  otp: string;
+  token: string;
 }
 
-// In-memory challenge cache
-const resetChallenges = new Map<string, PasswordResetChallenge>();
-
 /**
- * Creates or refreshes a password reset challenge for an email
+ * Creates a stateless, cryptographically signed password reset ticket
+ * Expires automatically in 15 minutes and functions across all Cloudflare Edge isolates
  */
-export function createResetChallenge(email: string): PasswordResetChallenge {
+export async function createResetTicket(email: string): Promise<ResetTicketData> {
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Generate 6-digit numeric OTP
+  // 6-digit numeric verification PIN
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Generate URL-safe random token
-  const token = Array.from({ length: 32 }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join("");
-
-  const challenge: PasswordResetChallenge = {
+  // Sign stateless JWT with 15-minute expiration
+  const token = await new SignJWT({
+    sub: normalizedEmail,
     email: normalizedEmail,
     otp,
-    token,
-    expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes validity
-    attempts: 0,
-  };
+    type: "password_reset",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("15m")
+    .sign(RESET_SECRET);
 
-  resetChallenges.set(normalizedEmail, challenge);
-  return challenge;
+  return { email: normalizedEmail, otp, token };
 }
 
 /**
- * Validates an OTP code or URL token for an email
+ * Validates the verification PIN or direct token against the cryptographic ticket
  */
-export function verifyResetChallenge(
+export async function verifyResetTicket(
   email: string,
-  otpOrToken: string
-): { valid: boolean; error?: string } {
+  otpOrToken: string,
+  ticketToken?: string
+): Promise<{ valid: boolean; error?: string }> {
   const normalizedEmail = email.toLowerCase().trim();
-  const challenge = resetChallenges.get(normalizedEmail);
+  const tokenToVerify = ticketToken || (otpOrToken.split(".").length === 3 ? otpOrToken : null);
 
-  if (!challenge) {
+  if (!tokenToVerify) {
     return {
       valid: false,
-      error: "No active password reset request found. Please request a new verification code.",
+      error: "No active verification token provided. Please request a new verification code.",
     };
   }
 
-  if (Date.now() > challenge.expiresAt) {
-    resetChallenges.delete(normalizedEmail);
+  try {
+    const { payload } = await jwtVerify(tokenToVerify, RESET_SECRET, {
+      algorithms: ["HS256"],
+    });
+
+    const tokenEmail = ((payload.email as string) || (payload.sub as string) || "").toLowerCase().trim();
+    if (tokenEmail !== normalizedEmail) {
+      return {
+        valid: false,
+        error: "Verification token does not match this account email address.",
+      };
+    }
+
+    // If an OTP was submitted alongside the token, ensure the OTP matches the payload
+    if (otpOrToken && otpOrToken !== tokenToVerify) {
+      const submittedOtp = otpOrToken.trim();
+      const expectedOtp = payload.otp as string;
+      if (submittedOtp !== expectedOtp) {
+        return {
+          valid: false,
+          error: "Invalid 6-digit verification PIN. Please verify and try again.",
+        };
+      }
+    }
+
+    return { valid: true };
+  } catch (err: any) {
+    if (err?.code === "ERR_JWT_EXPIRED") {
+      return {
+        valid: false,
+        error: "The verification code or link has expired. Please request a new code.",
+      };
+    }
     return {
       valid: false,
-      error: "The verification code has expired. Please request a new one.",
+      error: "Invalid or tampered verification token.",
     };
   }
-
-  if (challenge.attempts >= 5) {
-    resetChallenges.delete(normalizedEmail);
-    return {
-      valid: false,
-      error: "Too many failed attempts. Please request a new verification code.",
-    };
-  }
-
-  const cleanInput = otpOrToken.trim();
-  const isMatch = cleanInput === challenge.otp || cleanInput === challenge.token;
-
-  if (!isMatch) {
-    challenge.attempts += 1;
-    return {
-      valid: false,
-      error: "Invalid verification code or token. Please check and try again.",
-    };
-  }
-
-  return { valid: true };
-}
-
-/**
- * Consumes the challenge once the password is reset
- */
-export function consumeResetChallenge(email: string): void {
-  resetChallenges.delete(email.toLowerCase().trim());
 }

@@ -22,6 +22,7 @@ export default function ForgotPasswordPage() {
   // Step 1: Email Request; Step 2: OTP & New Password/PIN
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,6 +52,7 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         setStep(2);
+        if (data.resetToken) setResetToken(data.resetToken);
         setSuccessMsg(data.message || "A 6-digit verification code has been dispatched to your email.");
         if (data.previewOtp) {
           setPreviewOtp(data.previewOtp);
@@ -94,6 +96,7 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({
           email,
           otp: otp.trim(),
+          token: resetToken,
           newPassword: newPassword.trim(),
         }),
       });

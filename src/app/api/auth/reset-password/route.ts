@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
-import { verifyResetChallenge, consumeResetChallenge } from "@/lib/passwordResetStore";
+import { verifyResetTicket } from "@/lib/passwordResetStore";
 
 export const runtime = "edge";
 
@@ -33,8 +33,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verify OTP or token against challenge store
-    const verification = verifyResetChallenge(normalizedEmail, verificationKey);
+    // Check cookie or passed token for stateless verification across isolates
+    const cookieHeader = req.headers.get("cookie") || "";
+    const cookieMatch = cookieHeader.match(/wc_reset_ticket=([^;]+)/);
+    const cookieToken = cookieMatch ? decodeURIComponent(cookieMatch[1]) : "";
+    const effectiveToken = token || cookieToken;
+
+    // Verify OTP or token against stateless ticket
+    const verification = await verifyResetTicket(normalizedEmail, verificationKey, effectiveToken);
     if (!verification.valid) {
       return NextResponse.json(
         { error: verification.error || "Invalid or expired verification code." },
@@ -54,13 +60,15 @@ export async function POST(req: Request) {
       },
     });
 
-    // Invalidate the reset challenge so it cannot be reused
-    consumeResetChallenge(normalizedEmail);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Password / PIN has been reset successfully. You can now sign in with your new credentials.",
     });
+
+    // Clear reset ticket cookie
+    response.cookies.set("wc_reset_ticket", "", { maxAge: 0, path: "/" });
+
+    return response;
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to reset password." },

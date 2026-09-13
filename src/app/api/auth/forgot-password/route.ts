@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createResetChallenge } from "@/lib/passwordResetStore";
+import { createResetTicket } from "@/lib/passwordResetStore";
 import { sendEmailViaGmailSmtp, getSmtpSettings } from "@/lib/smtpSettings";
 
 export const runtime = "edge";
@@ -30,8 +30,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate ephemeral 6-digit OTP challenge and token
-    const challenge = createResetChallenge(normalizedEmail);
+    // Generate stateless cryptographic 6-digit OTP ticket and token
+    const challenge = await createResetTicket(normalizedEmail);
 
     // Resolve base application URL
     const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://wildcanvas.pages.dev";
@@ -136,14 +136,25 @@ export async function POST(req: Request) {
       html,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "A verification code has been dispatched to your email address.",
       email: normalizedEmail,
+      resetToken: challenge.token,
       simulated: mailResult.simulated || false,
-      // Provide OTP in response when in simulation mode so users can test even before SMTP configuration
       previewOtp: mailResult.simulated ? challenge.otp : undefined,
     });
+
+    // Set ephemeral 15-minute reset ticket cookie
+    response.cookies.set("wc_reset_ticket", challenge.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 15 * 60, // 15 minutes
+    });
+
+    return response;
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to process forgot password request." },
