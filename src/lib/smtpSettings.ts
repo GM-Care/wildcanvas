@@ -116,9 +116,9 @@ export async function sendEmailViaGmailSmtp(options: SendMailOptions): Promise<S
     // 1. Check for Cloudflare Workers direct TLS sockets
     let cfConnect: any = null;
     try {
-      // Dynamic import to support edge bundling without node bundler errors
-      // @ts-ignore
-      const cfSockets: any = await import("cloudflare:sockets");
+      // Dynamic runtime evaluation to prevent Webpack UnhandledSchemeError during build
+      const dynamicImport = new Function("modulePath", "return import(modulePath)");
+      const cfSockets: any = await dynamicImport("cloudflare:sockets");
       cfConnect = cfSockets?.connect;
     } catch {
       // cloudflare:sockets not present in local node
@@ -141,8 +141,8 @@ export async function sendEmailViaGmailSmtp(options: SendMailOptions): Promise<S
     // 2. Check for Node.js tls.connect
     let nodeTls: any = null;
     try {
-      // @ts-ignore
-      nodeTls = await import("tls");
+      const dynamicImport = new Function("modulePath", "return import(modulePath)");
+      nodeTls = await dynamicImport("tls");
     } catch {
       // tls not present in edge
     }
