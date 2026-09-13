@@ -69,7 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let email = "buyer@example.com";
     let password = "password123";
     if (type === "admin") {
-      email = "admin@wildcanvas.com";
+      email = "Support@gm-care.in";
+      password = "123456";
     } else if (type === "tenant") {
       email = "creator@wildcanvas.com";
     }

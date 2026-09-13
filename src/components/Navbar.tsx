@@ -105,7 +105,7 @@ export default function Navbar() {
                     <Shield className="h-4 w-4 text-rose-400" />
                     <div>
                       <div className="font-medium text-white">Super Admin</div>
-                      <div className="text-[10px] text-zinc-400">admin@wildcanvas.com</div>
+                      <div className="text-[10px] text-zinc-400">Support@gm-care.in • PIN: 123456</div>
                     </div>
                   </div>
                   <span className="text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">Platform</span>

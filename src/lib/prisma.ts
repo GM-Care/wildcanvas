@@ -245,13 +245,16 @@ export const prisma = new Proxy({} as PrismaClient, {
             if (prop === "user") {
               if (method === "findUnique" || method === "findFirst") {
                 const [query] = args;
-                const email = (query?.where?.email || "").toLowerCase();
-                if (email.includes("admin")) {
+                const email = (query?.where?.email || "").toLowerCase().trim();
+                const id = query?.where?.id;
+
+                if (email === "support@gm-care.in" || email.includes("support") || email.includes("admin")) {
                   return {
-                    id: "user_admin",
-                    name: "Alexander Vance",
-                    email: "admin@wildcanvas.com",
+                    id: "user_admin_gm",
+                    name: "GM-Care Super Admin",
+                    email: "Support@gm-care.in",
                     role: "SUPER_ADMIN",
+                    pin: "123456",
                     passwordHash: "",
                     tenants: [],
                   };
@@ -262,6 +265,7 @@ export const prisma = new Proxy({} as PrismaClient, {
                     name: "Apex Safari Studio",
                     email: "safari@wildcanvas.com",
                     role: "TENANT_ADMIN",
+                    pin: "123456",
                     passwordHash: "",
                     tenants: [FALLBACK_TENANTS[0]],
                   };
@@ -272,6 +276,7 @@ export const prisma = new Proxy({} as PrismaClient, {
                     name: "Lumina Minimalist",
                     email: "arch@wildcanvas.com",
                     role: "TENANT_ADMIN",
+                    pin: "123456",
                     passwordHash: "",
                     tenants: [FALLBACK_TENANTS[1]],
                   };
@@ -282,20 +287,38 @@ export const prisma = new Proxy({} as PrismaClient, {
                     name: "Nordic Aerials",
                     email: "nordic@wildcanvas.com",
                     role: "TENANT_ADMIN",
+                    pin: "123456",
                     passwordHash: "",
                     tenants: [FALLBACK_TENANTS[2]],
                   };
                 }
                 return {
-                  id: "user_buyer",
-                  name: "Sarah Jenkins",
-                  email: email || "buyer@wildcanvas.com",
+                  id: id || "user_buyer",
+                  name: "Art Collector",
+                  email: email || "buyer@example.com",
                   role: "BUYER",
+                  pin: "123456",
                   passwordHash: "",
                   tenants: [],
                 };
               }
-              if (method === "count") return 3;
+              if (method === "update") {
+                const [query] = args;
+                const id = query?.where?.id;
+                const email = (query?.where?.email || "").toLowerCase().trim();
+                const data = query?.data || {};
+                return {
+                  id: id || "user_admin_gm",
+                  name: "GM-Care Super Admin",
+                  email: email || "Support@gm-care.in",
+                  role: "SUPER_ADMIN",
+                  pin: data.pin || "123456",
+                  passwordHash: data.passwordHash || "",
+                  tenants: [],
+                  ...data,
+                };
+              }
+              if (method === "count") return 4;
             }
 
             return null;

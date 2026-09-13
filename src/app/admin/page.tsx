@@ -13,10 +13,12 @@ import {
   ArrowUpRight,
   Sliders,
   CreditCard,
+  Mail,
 } from "lucide-react";
 import { isR2Configured } from "@/lib/r2";
 import { formatINR } from "@/lib/currency";
 import { getPaymentSettings } from "@/lib/paymentSettings";
+import { getSmtpSettings } from "@/lib/smtpSettings";
 
 export const revalidate = 10;
 export const runtime = "edge";
@@ -28,6 +30,7 @@ export default async function AdminDashboardPage() {
     usersCount,
     orders,
     paymentConfig,
+    smtpConfig,
   ] = await Promise.all([
     prisma.tenant.findMany({
       include: {
@@ -42,6 +45,7 @@ export default async function AdminDashboardPage() {
       where: { status: "COMPLETED" },
     }),
     getPaymentSettings(),
+    getSmtpSettings(),
   ]);
 
   const totalGmvCents = orders.reduce((acc, o) => acc + o.totalAmountCents, 0);
@@ -52,6 +56,7 @@ export default async function AdminDashboardPage() {
   ).length;
 
   const isRazorpayConfigured = Boolean(paymentConfig.keyId && paymentConfig.keySecret);
+  const isSmtpConfigured = Boolean(smtpConfig.pass && smtpConfig.pass.trim().length > 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 space-y-10">
@@ -68,12 +73,31 @@ export default async function AdminDashboardPage() {
             </span>
           </div>
           <p className="text-xs text-zinc-400">
-            Global governance, Razorpay India payments, platform commissions, and multi-tenant telemetry.
+            Global governance, Razorpay India payments, platform commissions, Gmail SMTP dispatch, and multi-tenant telemetry.
           </p>
         </div>
 
         {/* Status Pills */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Gmail SMTP Status Pill */}
+          <Link
+            href="/admin/smtp"
+            className="flex items-center space-x-2 rounded-2xl border border-zinc-800 bg-zinc-900/90 hover:border-amber-500/40 px-4 py-2 text-xs transition-colors"
+          >
+            <Mail className={`h-4 w-4 ${isSmtpConfigured ? "text-emerald-400" : "text-amber-400"}`} />
+            <div>
+              <div className="font-semibold text-white flex items-center space-x-1">
+                <span>Gmail SMTP</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">
+                  SSL:465
+                </span>
+              </div>
+              <div className="text-[10px] text-zinc-400">
+                {isSmtpConfigured ? "Live / Connected" : "App Password Needed"}
+              </div>
+            </div>
+          </Link>
+
           {/* Razorpay Gateway Status Pill */}
           <Link
             href="/admin/payments"
@@ -127,6 +151,13 @@ export default async function AdminDashboardPage() {
           className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5"
         >
           <span>Razorpay Gateway</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+        </Link>
+        <Link
+          href="/admin/smtp"
+          className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5"
+        >
+          <span>Gmail SMTP</span>
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
         </Link>
       </div>

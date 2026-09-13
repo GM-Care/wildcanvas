@@ -67,7 +67,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <div className="text-xs font-bold text-white">Super Admin</div>
-                <div className="text-[10px] text-zinc-400">admin@wildcanvas.com</div>
+                <div className="text-[10px] text-zinc-400">Support@gm-care.in • PIN: 123456</div>
               </div>
             </div>
             <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">
@@ -136,25 +136,37 @@ export default function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@wildcanvas.com"
+            placeholder="Support@gm-care.in"
             className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-zinc-300 block mb-1">
-            Password
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-semibold text-zinc-300">
+              Password / PIN
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Forgot Password / PIN?
+            </Link>
+          </div>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder="Enter password or 6-digit PIN (e.g. 123456)"
             className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
           />
-          <div className="text-[10px] text-zinc-500 mt-1">
-            Demo password: <span className="font-mono text-zinc-400">password123</span>
+          <div className="text-[10px] text-zinc-500 mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span>Admin PIN:</span>
+            <span className="font-mono text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.2 rounded">123456</span>
+            <span className="text-zinc-600">•</span>
+            <span>Demo accounts password:</span>
+            <span className="font-mono text-zinc-400">password123</span>
           </div>
         </div>
 
